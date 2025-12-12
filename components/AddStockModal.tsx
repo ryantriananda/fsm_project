@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCcw, Plus, Trash2, Image as ImageIcon, List } from 'lucide-react';
+import { X, RefreshCcw, Plus, Trash2, Image as ImageIcon, List, Calendar, DollarSign, Wrench, AlertCircle, CreditCard as CreditCardIcon, Upload } from 'lucide-react';
 import { VehicleRecord, ServiceRecord, MutationRecord, SalesRecord, SalesOffer, ContractRecord, GeneralMasterItem, MasterVendorRecord } from '../types';
 
 interface Props {
@@ -159,12 +159,22 @@ export const AddStockModal: React.FC<Props> = ({
 
   // Derived state for mutation asset details
   const [selectedMutationAsset, setSelectedMutationAsset] = useState<VehicleRecord | null>(null);
+  // Derived state for service asset details
+  const [selectedServiceAsset, setSelectedServiceAsset] = useState<VehicleRecord | null>(null);
 
   useEffect(() => {
     if (isOpen) {
         if ((mode === 'edit' || mode === 'view')) {
             if (initialVehicleData) setVehicleForm(initialVehicleData);
-            if (initialServiceData) setServiceForm(initialServiceData);
+            if (initialServiceData) {
+                setServiceForm(initialServiceData);
+                if (initialServiceData.aset || initialServiceData.id) {
+                     // Try to match by ID or any logic available, data might need to carry asset ID better
+                     // Assuming 'aset' in service record holds vehicle ID in string
+                     const asset = vehicleList.find(v => v.id.toString() === initialServiceData.aset);
+                     setSelectedServiceAsset(asset || null);
+                }
+            }
             if (initialMutationData) {
                 setMutationForm(initialMutationData);
                 if (initialMutationData.asetId) {
@@ -198,6 +208,7 @@ export const AddStockModal: React.FC<Props> = ({
             setMasterVendorForm(defaultMasterVendorForm);
             setSalesOffers([{ nama: '', pic: '', phone: '', price: '' }]);
             setSelectedMutationAsset(null);
+            setSelectedServiceAsset(null);
         }
     }
   }, [isOpen, initialVehicleData, initialServiceData, initialMutationData, initialSalesData, initialContractData, initialMasterData, initialMasterVendorData, mode]);
@@ -208,6 +219,10 @@ export const AddStockModal: React.FC<Props> = ({
 
   const handleServiceChange = (field: keyof ServiceRecord, value: string) => {
       setServiceForm(prev => ({ ...prev, [field]: value }));
+      if (field === 'aset') {
+          const asset = vehicleList.find(v => v.id.toString() === value);
+          setSelectedServiceAsset(asset || null);
+      }
   };
 
   const handleMutationChange = (field: keyof MutationRecord, value: string) => {
@@ -300,8 +315,11 @@ export const AddStockModal: React.FC<Props> = ({
   const Required = () => <span className="text-red-500">*</span>;
 
   // Helper for section header
-  const SectionHeader: React.FC<{ title: string; orange?: boolean }> = ({ title, orange }) => (
-      <h3 className={`font-bold text-sm mb-4 border-b pb-2 ${orange ? 'text-orange-500 border-orange-200' : 'text-gray-900 border-gray-200'}`}>{title}</h3>
+  const SectionHeader: React.FC<{ title: string; orange?: boolean; icon?: React.ReactNode }> = ({ title, orange, icon }) => (
+      <div className={`flex items-center gap-2 border-b pb-2 mb-4 ${orange ? 'border-orange-200' : 'border-gray-200'}`}>
+         {icon && <span className={orange ? 'text-orange-500' : 'text-gray-700'}>{icon}</span>}
+         <h3 className={`font-bold text-sm uppercase tracking-wide ${orange ? 'text-orange-500' : 'text-gray-900'}`}>{title}</h3>
+      </div>
   );
 
   return (
@@ -437,28 +455,64 @@ export const AddStockModal: React.FC<Props> = ({
             </div>
 
           ) : isService ? (
-            /* --- SERVICE REQUEST FORM (Updated with Dynamic Masters) --- */
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <SectionHeader title={t.createRequest} />
-                
-                <div className="space-y-6">
-                    {/* Aset */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Aset <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.aset || ''} onChange={(e) => handleServiceChange('aset', e.target.value)} disabled={isViewMode}>
-                            <option value="">(Pilih Kendaraan)</option>
-                            {vehicleList.map(v => ( <option key={v.id} value={v.id}>{v.nama} - {v.noPolisi}</option> ))}
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex-1">
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Tanggal STNK <Required/></label>
-                             <input type="text" placeholder="dd/mm/yyyy" className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-500 cursor-not-allowed focus:outline-none" value={serviceForm.tglStnk || 'dd/mm/yyyy'} disabled />
+            /* --- SERVICE REQUEST FORM (Expanded with Detailed Inputs) --- */
+            <div className="space-y-6">
+                {/* 1. Vehicle Information */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <SectionHeader title={t.detailInfo} icon={<List size={18} />} />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                             <label className="block text-xs font-medium text-gray-600 mb-1">Aset / Kendaraan <Required/></label>
+                             <select 
+                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
+                                value={serviceForm.aset || ''} 
+                                onChange={(e) => handleServiceChange('aset', e.target.value)} 
+                                disabled={isViewMode}
+                             >
+                                <option value="">(Pilih Kendaraan)</option>
+                                {vehicleList.map(v => ( 
+                                    <option key={v.id} value={v.id}>{v.noPolisi} - {v.nama}</option> 
+                                ))}
+                             </select>
                         </div>
-                         <div className="flex-1">
+                        
+                        {/* Auto-populated Vehicle Details */}
+                        {selectedServiceAsset && (
+                            <div className="md:col-span-2 bg-gray-50 p-4 rounded border border-gray-100 grid grid-cols-3 gap-4 text-xs">
+                                <div>
+                                    <span className="block text-gray-500">Merek/Tipe</span>
+                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.merek} {selectedServiceAsset.tipeKendaraan}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-gray-500">Pengguna</span>
+                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.pengguna || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-gray-500">Cabang</span>
+                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.cabang}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">{t.odometer} <Required/></label>
+                            <input type="text" placeholder="ex: 12000" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.kmKendaraan || ''} onChange={(e) => handleServiceChange('kmKendaraan', e.target.value)} disabled={isViewMode} />
+                        </div>
+                        <div>
+                             <label className="block text-xs font-medium text-gray-600 mb-1">Tanggal STNK</label>
+                             <input type="text" placeholder="dd/mm/yyyy" className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-500 cursor-not-allowed focus:outline-none" value={serviceForm.tglStnk || '-'} disabled />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Service Details */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <SectionHeader title={t.service} icon={<Wrench size={18} />} />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
                              <label className="block text-xs font-medium text-gray-600 mb-1">Jenis Servis <Required/></label>
-                             {/* Dynamic Master: Jenis Servis */}
                              <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.jenisServis} onChange={(e) => handleServiceChange('jenisServis', e.target.value)} disabled={isViewMode}>
                                 {(masterData['Jenis Servis'] || []).map(m => (
                                     <option key={m.id} value={m.name}>{m.name}</option>
@@ -466,18 +520,55 @@ export const AddStockModal: React.FC<Props> = ({
                                 {!masterData['Jenis Servis']?.length && <option value="Servis Rutin">Servis Rutin</option>}
                              </select>
                         </div>
-                    </div>
-
-                     {/* ... Vendor, Target, KM fields ... */}
-
-                     <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex-1">
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Estimasi Biaya <Required/></label>
-                             <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.estimasiBiaya || ''} onChange={(e) => handleServiceChange('estimasiBiaya', e.target.value)} disabled={isViewMode} />
+                        <div>
+                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.targetDate} <Required/></label>
+                             <div className="relative">
+                                <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.targetSelesai || ''} onChange={(e) => handleServiceChange('targetSelesai', e.target.value)} disabled={isViewMode} />
+                             </div>
                         </div>
-                        <div className="flex-1">
+                        
+                        <div className="md:col-span-2">
+                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.problem} <Required/></label>
+                             <textarea 
+                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
+                                rows={3} 
+                                placeholder="Jelaskan keluhan atau masalah pada kendaraan..."
+                                value={serviceForm.masalah || ''} 
+                                onChange={(e) => handleServiceChange('masalah', e.target.value)} 
+                                disabled={isViewMode}
+                             />
+                        </div>
+                        <div className="md:col-span-2">
+                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.cause}</label>
+                             <textarea 
+                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
+                                rows={2} 
+                                placeholder="Analisa penyebab kerusakan (jika ada)..."
+                                value={serviceForm.penyebab || ''} 
+                                onChange={(e) => handleServiceChange('penyebab', e.target.value)} 
+                                disabled={isViewMode}
+                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Cost & Payment */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                     <SectionHeader title="Biaya & Pembayaran" icon={<DollarSign size={18} />} />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.vendorName} <Required/></label>
+                             <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.vendor || ''} onChange={(e) => handleServiceChange('vendor', e.target.value)} disabled={isViewMode} placeholder="Pilih atau ketik nama vendor" />
+                        </div>
+                        <div>
+                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.estimatedCost} <Required/></label>
+                             <div className="relative">
+                                <span className="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
+                                <input type="text" className="w-full bg-white border border-gray-300 rounded pl-8 pr-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.estimasiBiaya || ''} onChange={(e) => handleServiceChange('estimasiBiaya', e.target.value)} disabled={isViewMode} />
+                             </div>
+                        </div>
+                        <div>
                              <label className="block text-xs font-medium text-gray-600 mb-1">Jenis Pembayaran <Required/></label>
-                              {/* Dynamic Master: Jenis Pembayaran */}
                               <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.jenisPembayaran} onChange={(e) => handleServiceChange('jenisPembayaran', e.target.value)} disabled={isViewMode}>
                                 {(masterData['Jenis Pembayaran'] || []).map(m => (
                                     <option key={m.id} value={m.name}>{m.name}</option>
@@ -485,8 +576,32 @@ export const AddStockModal: React.FC<Props> = ({
                                 {!masterData['Jenis Pembayaran']?.length && <option value="Kasbon">Kasbon</option>}
                              </select>
                         </div>
+
+                        {/* Bank Details */}
+                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 mt-2">
+                             <div>
+                                 <label className="block text-xs font-medium text-gray-600 mb-1">{t.bankName}</label>
+                                 <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.namaBank || ''} onChange={(e) => handleServiceChange('namaBank', e.target.value)} disabled={isViewMode} />
+                             </div>
+                             <div>
+                                 <label className="block text-xs font-medium text-gray-600 mb-1">{t.accountNumber}</label>
+                                 <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.nomorRekening || ''} onChange={(e) => handleServiceChange('nomorRekening', e.target.value)} disabled={isViewMode} />
+                             </div>
+                        </div>
+
+                        {/* Invoice Attachment */}
+                         <div className="md:col-span-2 mt-2">
+                            <label className="block text-xs font-medium text-gray-600 mb-1">{t.invoiceAttachment}</label>
+                            <div className={`border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center transition-colors relative ${!isViewMode ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-70 cursor-default'}`}>
+                                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-default" disabled={isViewMode} />
+                                <div className="bg-gray-100 p-3 rounded-full mb-3">
+                                    <Upload size={24} className="text-gray-500" />
+                                </div>
+                                <p className="text-sm font-medium text-gray-900">{t.dragDrop}</p>
+                                <p className="text-xs text-gray-500 mt-1">PDF, PNG, JPG up to 10MB</p>
+                            </div>
+                        </div>
                     </div>
-                    {/* ... Bank fields ... */}
                 </div>
             </div>
           ) : isVehicle ? (

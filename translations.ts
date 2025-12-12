@@ -71,7 +71,18 @@ export const TRANSLATIONS = {
     insurance: 'Asuransi',
     attachments: 'Lampiran',
     users: 'Pengguna',
-    offers: 'Penawaran'
+    offers: 'Penawaran',
+    // New Service Fields
+    odometer: 'KM Kendaraan (Odo)',
+    targetDate: 'Target Selesai',
+    problem: 'Keluhan / Masalah',
+    cause: 'Analisa / Penyebab',
+    bankName: 'Nama Bank',
+    accountNumber: 'Nomor Rekening',
+    estimatedCost: 'Estimasi Biaya',
+    vendorName: 'Nama Vendor',
+    invoiceAttachment: 'Lampiran Invoice',
+    dragDrop: 'Klik untuk unggah atau seret dan lepas'
   },
   en: {
     dashboard: 'Dashboard',
@@ -144,6 +155,17 @@ export const TRANSLATIONS = {
     insurance: 'Insurance',
     attachments: 'Attachments',
     users: 'Users',
-    offers: 'Offers'
+    offers: 'Offers',
+    // New Service Fields
+    odometer: 'Odometer (KM)',
+    targetDate: 'Target Completion',
+    problem: 'Problem / Complaint',
+    cause: 'Analysis / Cause',
+    bankName: 'Bank Name',
+    accountNumber: 'Account Number',
+    estimatedCost: 'Estimated Cost',
+    vendorName: 'Vendor Name',
+    invoiceAttachment: 'Invoice Attachment',
+    dragDrop: 'Click to upload or drag and drop'
   }
 };
