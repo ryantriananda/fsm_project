@@ -26,6 +26,7 @@ interface Props {
   mode?: 'create' | 'edit' | 'view';
   vehicleList?: VehicleRecord[];
   masterData?: Record<string, GeneralMasterItem[]>;
+  t: any;
 }
 
 export const AddStockModal: React.FC<Props> = ({ 
@@ -48,7 +49,8 @@ export const AddStockModal: React.FC<Props> = ({
     initialMasterVendorData,
     mode = 'create',
     vehicleList = [],
-    masterData = {}
+    masterData = {},
+    t
 }) => {
   const [selectedDetail, setSelectedDetail] = useState<boolean>(false);
   
@@ -283,15 +285,15 @@ export const AddStockModal: React.FC<Props> = ({
   const isEditMode = mode === 'edit';
 
   const getTitle = () => {
-    if (isContract) return mode === 'create' ? 'Add Asset Data' : 'Asset Data Detail';
+    if (isContract) return mode === 'create' ? t.addAsset : t.assetList;
     if (isVendor) return 'Master Vendor > New Vendor';
-    if (isMasterVendor) return 'Buat Vendor';
-    if (isVehicle) return mode === 'create' ? 'Daftar Aset Kendaraan > Baru' : 'Daftar Aset Kendaraan';
-    if (isService) return 'Request Servis Kendaraan';
-    if (isMutation) return 'Permintaan Mutasi Kendaraan';
-    if (isSales) return 'Permintaan Penjualan Kendaraan';
+    if (isMasterVendor) return t.addVendor;
+    if (isVehicle) return mode === 'create' ? `${t.vehicleAssetList} > ${t.new}` : t.vehicleAssetList;
+    if (isService) return t.createRequest;
+    if (isMutation) return t.createRequest;
+    if (isSales) return t.createRequest;
     if (isMaster) return `Master ${moduleName}`;
-    return `Master ${moduleName} > Tambah Stock`;
+    return `Master ${moduleName} > ${t.add}`;
   }
 
   // Helper for red asterisk
@@ -437,7 +439,7 @@ export const AddStockModal: React.FC<Props> = ({
           ) : isService ? (
             /* --- SERVICE REQUEST FORM (Updated with Dynamic Masters) --- */
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <SectionHeader title="Request Servis" />
+                <SectionHeader title={t.createRequest} />
                 
                 <div className="space-y-6">
                     {/* Aset */}
@@ -494,7 +496,7 @@ export const AddStockModal: React.FC<Props> = ({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Column 1: Detail Informasi */}
                     <div className="space-y-4">
-                        <SectionHeader title="Detail Informasi" />
+                        <SectionHeader title={t.detailInfo} />
                         <div className="grid grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">No. Registrasi <Required/></label>
@@ -560,7 +562,7 @@ export const AddStockModal: React.FC<Props> = ({
                         
                          {/* Pengguna Section */}
                         <div className="mt-4">
-                            <SectionHeader title="Pengguna" />
+                            <SectionHeader title={t.users} />
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Channel <Required/></label>
@@ -588,7 +590,7 @@ export const AddStockModal: React.FC<Props> = ({
                         </div>
                          {/* Lampiran */}
                          <div className="mt-4">
-                            <SectionHeader title="Lampiran" />
+                            <SectionHeader title={t.attachments} />
                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                                 {[
                                     'Tampak Depan',
@@ -621,7 +623,7 @@ export const AddStockModal: React.FC<Props> = ({
                     <div className="space-y-6">
                          {/* Surat */}
                         <div>
-                             <SectionHeader title="Surat" />
+                             <SectionHeader title={t.documents} />
                              <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">No. BPKB <Required/></label>
@@ -650,7 +652,7 @@ export const AddStockModal: React.FC<Props> = ({
 
                         {/* Pembelian */}
                         <div>
-                             <SectionHeader title="Pembelian" />
+                             <SectionHeader title={t.purchase} />
                              <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Tgl Beli <Required/></label>
@@ -665,7 +667,7 @@ export const AddStockModal: React.FC<Props> = ({
 
                          {/* Asuransi */}
                         <div>
-                             <SectionHeader title="Asuransi" />
+                             <SectionHeader title={t.insurance} />
                              <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-600 mb-1">No Polis</label>
@@ -683,7 +685,7 @@ export const AddStockModal: React.FC<Props> = ({
           ) : isMutation ? (
               /* --- MUTATION FORM (Updated with Dynamic Masters) --- */
                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title="Permintaan Mutasi Kendaraan" />
+                    <SectionHeader title={t.createRequest} />
                     <div className="space-y-6">
                         <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Mutasi <Required/></label>
@@ -714,7 +716,7 @@ export const AddStockModal: React.FC<Props> = ({
           ) : isSales ? (
                /* --- SALES FORM --- */
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title="Permintaan Penjualan" />
+                    <SectionHeader title={t.createRequest} />
                     {/* ... Sales Fields ... */}
                     <div className="space-y-6">
                          <div>
@@ -731,7 +733,7 @@ export const AddStockModal: React.FC<Props> = ({
                     </div>
                      {/* ... Offers Table ... */}
                      <div className="mt-8">
-                        <SectionHeader title="Penawaran" />
+                        <SectionHeader title={t.offers} />
                          {/* ... Offers ... */}
                          <div className="w-full bg-[#0088CC] text-white p-1 flex items-center justify-center cursor-pointer hover:bg-[#0077b3] transition-colors" onClick={!isViewMode ? addOfferRow : undefined}>
                             <Plus size={16} />
@@ -751,13 +753,13 @@ export const AddStockModal: React.FC<Props> = ({
                 onClick={onClose}
                 className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-                Draft
+                {t.draft}
             </button>
             <button 
                 onClick={handleSave}
                 className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors shadow-sm ${isMasterVendor ? 'bg-orange-500 hover:bg-orange-600' : 'bg-black hover:bg-gray-800'}`}
             >
-                {isMasterVendor ? 'Submit' : 'Simpan'}
+                {isMasterVendor ? t.submit : t.save}
             </button>
             </div>
         )}

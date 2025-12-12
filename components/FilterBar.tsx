@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Search, Filter, Plus, LayoutGrid, List, ChevronsRight, Filter as FilterIcon, Calendar, Upload, Download, FileText } from 'lucide-react';
 
@@ -8,21 +9,23 @@ interface Props {
   onAddClick: () => void;
   searchPlaceholder?: string;
   moduleName?: string;
+  t: any;
 }
 
-export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAddClick, searchPlaceholder = "Search by Employee, Item...", moduleName }) => {
-  
+export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAddClick, searchPlaceholder, moduleName, t }) => {
+  const placeholder = searchPlaceholder || t.searchPlaceholder;
+
   // Specific layout for Daftar Aset (Vehicle), Servis, Pajak & KIR, Mutasi, Penjualan AND Contract (List Building)
   if (moduleName === 'Daftar Aset' || moduleName === 'Servis' || moduleName === 'Pajak & KIR' || moduleName === 'Mutasi' || moduleName === 'Penjualan' || moduleName === 'Contract' || moduleName === 'Master Vendor') {
     return (
         <div className="mb-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* Tabs as Buttons - Only show if there are actual tabs (length > 1 or specific modules) */}
+                {/* Tabs as Buttons */}
                 {tabs.length > 0 && (
                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
                         {tabs.map((tab) => {
                             const isActive = activeTab === tab;
-                            const isApproval = tab.includes('Persetujuan');
+                            const isApproval = tab.includes('Persetujuan') || tab.includes('Approval');
                             return (
                                 <button
                                     key={tab}
@@ -43,15 +46,13 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
                     </div>
                 )}
                 
-                {/* If no tabs and not Master Vendor, show empty div to push search right? No, standard flex justify-between works. */}
-
                 {/* Right Side: Search & Filter */}
                 <div className={`flex items-center gap-3 w-full md:w-auto ${tabs.length === 0 ? 'flex-1' : ''}`}>
                     <div className={`relative ${tabs.length === 0 ? 'w-64' : 'flex-1 md:w-80'}`}>
                         <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                         <input 
                             type="text" 
-                            placeholder={searchPlaceholder} 
+                            placeholder={placeholder} 
                             className="w-full bg-white pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-200 focus:border-gray-400 outline-none transition-all"
                         />
                     </div>
@@ -61,18 +62,18 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
                         <>
                             <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap">
                                 <Upload size={16} />
-                                Import
+                                {t.import}
                             </button>
                             <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap">
                                 <Download size={16} />
-                                Export
+                                {t.export}
                             </button>
                         </>
                     )}
 
                      {moduleName === 'Contract' && (
                         <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap">
-                             Download
+                             {t.download}
                              <Download size={16} /> 
                         </button>
                      )}
@@ -80,22 +81,22 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
                      {moduleName === 'Master Vendor' && (
                         <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap">
                              <FileText size={16} />
-                             Import Data Vendor
+                             {t.importDataVendor}
                         </button>
                      )}
 
                     <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap">
                         <Filter size={16} />
-                        Filter
+                        {t.filter}
                     </button>
                     <button 
                         onClick={onAddClick}
                         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors shadow-sm whitespace-nowrap bg-black hover:bg-gray-800`}
                     >
                         <Plus size={16} />
-                        {(moduleName === 'Servis' || moduleName === 'Pajak & KIR' || moduleName === 'Mutasi' || moduleName === 'Penjualan') ? 'Buat Permintaan' : 
-                         moduleName === 'Contract' ? 'Add Asset' : 
-                         moduleName === 'Master Vendor' ? 'Tambah Vendor' : 'Tambah'}
+                        {(moduleName === 'Servis' || moduleName === 'Pajak & KIR' || moduleName === 'Mutasi' || moduleName === 'Penjualan') ? t.createRequest : 
+                         moduleName === 'Contract' ? t.addAsset : 
+                         moduleName === 'Master Vendor' ? t.addVendor : t.add}
                     </button>
                 </div>
             </div>
@@ -114,7 +115,7 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
                     <div className="flex-1 min-w-[300px]">
                         <div className="flex items-center gap-2 mb-2">
                              <div className="bg-black rounded-full p-1"><ChevronsRight size={12} className="text-white"/></div>
-                             <span className="text-xs font-medium text-gray-500">Employment Status</span>
+                             <span className="text-xs font-medium text-gray-500">{t.employmentStatus}</span>
                         </div>
                         <div className="flex border border-gray-300 rounded-lg overflow-hidden h-[38px]">
                             {tabs.map((tab) => {
@@ -136,11 +137,11 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
 
                     {/* Select Employee */}
                     <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Select Employee</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t.selectEmployee}</label>
                         <div className="relative">
                             <input 
                                 type="text" 
-                                placeholder="Select Employee" 
+                                placeholder={t.selectEmployee} 
                                 defaultValue="Alam Anugrah Akbar x + 13 ..."
                                 className="w-full bg-white pl-4 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 outline-none text-gray-700 h-[38px]"
                             />
@@ -152,7 +153,7 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
 
                     {/* Select Date */}
                     <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Select Date</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t.selectDate}</label>
                         <div className="relative">
                             <input 
                                 type="text" 
@@ -165,7 +166,7 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
 
                     {/* Attendance Status */}
                     <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Attendance Status</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t.attendanceStatus}</label>
                          <div className="relative">
                             <input 
                                 type="text" 
@@ -207,19 +208,19 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
       <div className="bg-white p-5 rounded-b-lg rounded-tr-lg shadow-sm border border-gray-200 -mt-[1px] relative z-0">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
             <div className="md:col-span-3">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Search</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t.search}</label>
                 <div className="relative">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                     <input 
                     type="text" 
-                    placeholder={searchPlaceholder} 
+                    placeholder={placeholder} 
                     className="w-full bg-white pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 outline-none transition-all"
                     />
                 </div>
             </div>
 
             <div className="md:col-span-3">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Date Range</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t.dateRange}</label>
                 <input 
                     type="date" 
                     className="w-full bg-white px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 text-gray-600 outline-none"
@@ -227,9 +228,9 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
             </div>
 
             <div className="md:col-span-3">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t.category}</label>
                 <select className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 text-gray-600 outline-none bg-white">
-                    <option>Select Category...</option>
+                    <option>{t.selectCategory}</option>
                     <option>Tinta Printer</option>
                     <option>Kertas</option>
                     <option>Amplop</option>
@@ -240,14 +241,14 @@ export const FilterBar: React.FC<Props> = ({ tabs, activeTab, onTabChange, onAdd
             <div className="md:col-span-3 flex items-center justify-end gap-2">
                 <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     <Filter size={16} />
-                    Filter
+                    {t.filter}
                 </button>
                 <button 
                   onClick={onAddClick}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors shadow-sm"
                 >
                     <Plus size={16} />
-                    Tambah
+                    {t.add}
                 </button>
                 <div className="flex border border-gray-300 rounded-lg overflow-hidden ml-2 bg-white">
                     <button className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200"><LayoutGrid size={16}/></button>

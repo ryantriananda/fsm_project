@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
@@ -17,11 +18,16 @@ import { MasterVendorTable } from './components/MasterVendorTable';
 import { AddStockModal } from './components/AddStockModal';
 import { MOCK_DATA, MOCK_MASTER_DATA, MOCK_ARK_DATA, MOCK_MASTER_ARK_DATA, MOCK_CONTRACT_DATA, MOCK_TIMESHEET_DATA, MOCK_VENDOR_DATA, MOCK_VEHICLE_DATA, MOCK_SERVICE_DATA, MOCK_TAX_KIR_DATA, MOCK_MUTATION_DATA, MOCK_SALES_DATA, MOCK_MASTER_VENDOR_DATA } from './constants';
 import { VehicleRecord, ServiceRecord, MutationRecord, SalesRecord, TaxKirRecord, ContractRecord, GeneralMasterItem, MasterVendorRecord } from './types';
+import { TRANSLATIONS } from './translations';
 
 const App: React.FC = () => {
   const [activeModule, setActiveModule] = useState('ATK'); 
   const [activeTab, setActiveTab] = useState('Pengguna');
   
+  // Language State
+  const [lang, setLang] = useState<'id' | 'en'>('id');
+  const t = TRANSLATIONS[lang];
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -385,36 +391,47 @@ const App: React.FC = () => {
   };
 
   const getFilterTabs = () => {
+    // For specific modules, we might want to translate tabs. For now, keep as is or map if needed.
+    // Simplifying mapping for major modules.
     if (activeModule === 'ATK' || activeModule === 'ARK') return ['Pengguna', 'Master', 'Approval'];
-    if (activeModule === 'Contract') return ['Own', 'Rent'];
+    if (activeModule === 'Contract') return [t.own, t.rent];
     if (activeModule === 'Timesheet') return ['All', 'Permanent', 'Contract', 'Probation', 'Internship', 'Vendor'];
-    if (activeModule === 'Vendor') return ['Active', 'Inactive', 'Blacklist'];
-    if (activeModule === 'Daftar Aset') return ['Aktif', 'Tidak Aktif'];
-    if (activeModule === 'Servis' || activeModule === 'Pajak & KIR' || activeModule === 'Mutasi' || activeModule === 'Penjualan') return ['Semua', 'Persetujuan'];
+    if (activeModule === 'Vendor') return [t.active, t.inactive, 'Blacklist'];
+    if (activeModule === 'Daftar Aset') return [t.active, t.inactive];
+    if (activeModule === 'Servis' || activeModule === 'Pajak & KIR' || activeModule === 'Mutasi' || activeModule === 'Penjualan') return [t.all, t.approval];
     if (isMasterModule(activeModule) || activeModule === 'Master Vendor') return []; // No tabs for master sub-modules
-    return ['All'];
+    return [t.all];
   };
+
+  // Resolve Header Title
+  const getHeaderTitle = () => {
+     if (activeModule === 'Daftar Aset') return t.vehicleAssetList;
+     if (activeModule === 'Servis') return t.vehicleService;
+     if (activeModule === 'Pajak & KIR') return t.vehicleTax;
+     if (activeModule === 'Mutasi') return t.vehicleMutation;
+     if (activeModule === 'Penjualan') return t.vehicleSales;
+     if (activeModule === 'Contract') return t.buildingList;
+     if (activeModule === 'Master Vendor') return t.masterVendor;
+     // Fallback for dynamic masters or others
+     // Try to find translation for activeModule, otherwise show as is
+     // We need a reverse lookup or a key map if activeModule is the key? 
+     // activeModule is currently the ID String (e.g. 'Jenis Pajak')
+     // For this iteration, we keep the original string if no direct translation found in constants logic
+     return activeModule; 
+  }
 
   return (
     <div className="flex bg-gray-50 min-h-screen font-sans">
-      <Sidebar activeItem={activeModule} onNavigate={handleModuleNavigate} />
+      <Sidebar activeItem={activeModule} onNavigate={handleModuleNavigate} t={t} />
       
       <div className="flex-1 ml-64 flex flex-col">
-        <TopBar />
+        <TopBar lang={lang} setLang={setLang} t={t} />
         
         <main className="flex-1 p-8 overflow-y-auto">
           {/* Breadcrumb & Title */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">
-                {activeModule === 'Daftar Aset' ? 'Daftar Aset Kendaraan' : 
-                 activeModule === 'Servis' ? 'Servis Kendaraan' :
-                 activeModule === 'Pajak & KIR' ? 'Pajak & KIR Kendaraan' :
-                 activeModule === 'Mutasi' ? 'Mutasi Kendaraan' :
-                 activeModule === 'Penjualan' ? 'Penjualan Kendaraan' :
-                 activeModule === 'Contract' ? 'List Building' :
-                 activeModule === 'Master Vendor' ? 'Master Vendor' :
-                 isMasterModule(activeModule) ? `Master ${activeModule}` :
-                 activeModule}
+                {getHeaderTitle()}
             </h1>
           </div>
 
@@ -424,6 +441,8 @@ const App: React.FC = () => {
             onTabChange={setActiveTab} 
             onAddClick={handleAddClick}
             moduleName={activeModule}
+            searchPlaceholder={t.searchPlaceholder}
+            t={t}
           />
 
           {renderContent()}
@@ -451,6 +470,7 @@ const App: React.FC = () => {
         mode={modalMode}
         vehicleList={vehicleData}
         masterData={masters} 
+        t={t}
       />
     </div>
   );
