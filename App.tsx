@@ -199,6 +199,20 @@ const App: React.FC = () => {
       setIsModalOpen(true);
   };
 
+  // --- Handlers for Contract ---
+  const handleEditContract = (contract: ContractRecord) => {
+      setSelectedContract(contract);
+      setModalMode('edit');
+      setIsModalOpen(true);
+  };
+
+  const handleViewContract = (contract: ContractRecord) => {
+      setSelectedContract(contract);
+      setModalMode('view');
+      setIsModalOpen(true);
+  };
+
+
   // --- Handlers for Master Vendor ---
   const handleEditMasterVendor = (item: MasterVendorRecord) => {
       setSelectedMasterVendor(item);
@@ -336,6 +350,7 @@ const App: React.FC = () => {
           const newContract: ContractRecord = {
               id: newId,
               status: 'Active',
+              assetNumber: `BDG-${newId.toString().padStart(3, '0')}`,
               ...formData
           } as ContractRecord;
           setContractData([...contractData, newContract]);
@@ -354,7 +369,7 @@ const App: React.FC = () => {
         if (activeTab === 'Master') return <MasterAtkTable data={MOCK_MASTER_ARK_DATA} />;
         return <AssetTable data={MOCK_ARK_DATA} />;
     }
-    if (activeModule === 'Contract') return <ContractTable data={contractData} />;
+    if (activeModule === 'Contract') return <ContractTable data={contractData} onEdit={handleEditContract} onView={handleViewContract} />;
     if (activeModule === 'Timesheet') return <TimesheetTable data={MOCK_TIMESHEET_DATA} />;
     if (activeModule === 'Vendor') return <VendorTable data={MOCK_VENDOR_DATA} />;
     

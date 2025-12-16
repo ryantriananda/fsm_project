@@ -82,7 +82,22 @@ export const TRANSLATIONS = {
     estimatedCost: 'Estimasi Biaya',
     vendorName: 'Nama Vendor',
     invoiceAttachment: 'Lampiran Invoice',
-    dragDrop: 'Klik untuk unggah atau seret dan lepas'
+    dragDrop: 'Klik untuk unggah atau seret dan lepas',
+    // Contract / Building Fields
+    buildingName: 'Nama Gedung',
+    landlord: 'Pemilik Sewa (Landlord)',
+    period: 'Periode Sewa',
+    rentalCost: 'Biaya Sewa',
+    certificateNo: 'No. Sertifikat',
+    acquisitionDate: 'Tanggal Perolehan',
+    landArea: 'Luas Tanah (m2)',
+    buildingArea: 'Luas Bangunan (m2)',
+    insuranceProvider: 'Provider Asuransi',
+    policyNo: 'No. Polis',
+    maintenanceVendor: 'Vendor Perawatan',
+    maintenanceCost: 'Biaya Perawatan',
+    maintenanceSchedule: 'Jadwal Perawatan',
+    acquisitionValue: 'Nilai Perolehan'
   },
   en: {
     dashboard: 'Dashboard',
@@ -166,6 +181,21 @@ export const TRANSLATIONS = {
     estimatedCost: 'Estimated Cost',
     vendorName: 'Vendor Name',
     invoiceAttachment: 'Invoice Attachment',
-    dragDrop: 'Click to upload or drag and drop'
+    dragDrop: 'Click to upload or drag and drop',
+    // Contract / Building Fields
+    buildingName: 'Building Name',
+    landlord: 'Landlord',
+    period: 'Lease Period',
+    rentalCost: 'Rental Cost',
+    certificateNo: 'Certificate No.',
+    acquisitionDate: 'Acquisition Date',
+    landArea: 'Land Area (m2)',
+    buildingArea: 'Building Area (m2)',
+    insuranceProvider: 'Insurance Provider',
+    policyNo: 'Policy No.',
+    maintenanceVendor: 'Maintenance Vendor',
+    maintenanceCost: 'Maintenance Cost',
+    maintenanceSchedule: 'Maintenance Schedule',
+    acquisitionValue: 'Acquisition Value'
   }
 };

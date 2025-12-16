@@ -1,12 +1,14 @@
 import React from 'react';
 import { ContractRecord } from '../types';
-import { ChevronsUpDown, Eye, FolderX, Pencil } from 'lucide-react';
+import { ChevronsUpDown, Eye, FolderX, Pencil, Building2 } from 'lucide-react';
 
 interface Props {
   data: ContractRecord[];
+  onEdit?: (item: ContractRecord) => void;
+  onView?: (item: ContractRecord) => void;
 }
 
-export const ContractTable: React.FC<Props> = ({ data }) => {
+export const ContractTable: React.FC<Props> = ({ data, onEdit, onView }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[500px]">
       <div className="overflow-x-auto">
@@ -15,19 +17,7 @@ export const ContractTable: React.FC<Props> = ({ data }) => {
             <tr className="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
                 <div className="flex items-center justify-between">
-                  Asset Category
-                  <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
-                </div>
-              </th>
-              <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
-                <div className="flex items-center justify-between">
-                  Asset Number
-                  <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
-                </div>
-              </th>
-              <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
-                <div className="flex items-center justify-between">
-                  Address
+                  Name / Asset No
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
@@ -37,21 +27,21 @@ export const ContractTable: React.FC<Props> = ({ data }) => {
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
+               <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
+                <div className="flex items-center justify-between">
+                  Ownership
+                  <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
+                </div>
+              </th>
               <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
                 <div className="flex items-center justify-between">
                   Location (Branch)
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
-              <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
+              <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors w-96">
                 <div className="flex items-center justify-between">
-                  Channel
-                  <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
-                </div>
-              </th>
-              <th className="p-4 group cursor-pointer hover:bg-gray-200 transition-colors">
-                <div className="flex items-center justify-between">
-                  Sub - Location
+                  Address
                   <ChevronsUpDown size={14} className="text-gray-500 group-hover:text-gray-700"/>
                 </div>
               </th>
@@ -70,13 +60,25 @@ export const ContractTable: React.FC<Props> = ({ data }) => {
             {data.length > 0 ? (
                 data.map((item) => (
                     <tr key={item.id} className="bg-white hover:bg-gray-50 transition-colors cursor-pointer group">
-                        <td className="p-4 font-medium text-gray-900">{item.assetCategory}</td>
-                        <td className="p-4 font-medium text-gray-900">{item.assetNumber}</td>
-                        <td className="p-4 text-gray-600 truncate max-w-[200px]">{item.address}</td>
-                        <td className="p-4 text-gray-600">{item.type}</td>
+                        <td className="p-4">
+                             <div className="flex items-start gap-3">
+                                <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
+                                    <Building2 size={20} />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-900">{item.name}</p>
+                                    <p className="text-xs text-gray-500 font-mono">{item.assetNumber}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td className="p-4 text-gray-600 font-medium">{item.type}</td>
+                        <td className="p-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${item.ownership === 'Own' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                                {item.ownership}
+                            </span>
+                        </td>
                         <td className="p-4 text-gray-600">{item.location}</td>
-                        <td className="p-4 text-gray-600">{item.channel}</td>
-                        <td className="p-4 text-gray-600">{item.subLocation}</td>
+                        <td className="p-4 text-gray-600 truncate max-w-[300px]">{item.address}</td>
                         <td className="p-4">
                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${item.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                                 {item.status}
@@ -84,10 +86,16 @@ export const ContractTable: React.FC<Props> = ({ data }) => {
                         </td>
                         <td className="p-4 text-center">
                              <div className="flex items-center justify-center gap-2">
-                                <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); onView?.(item); }}
+                                  className="text-gray-400 hover:text-black transition-colors"
+                                >
                                     <Eye size={18} />
                                 </button>
-                                <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
+                                  className="text-gray-400 hover:text-black transition-colors"
+                                >
                                     <Pencil size={18} />
                                 </button>
                             </div>
@@ -96,7 +104,7 @@ export const ContractTable: React.FC<Props> = ({ data }) => {
                 ))
             ) : (
                 <tr>
-                    <td colSpan={9} className="p-12 text-center">
+                    <td colSpan={7} className="p-12 text-center">
                         <div className="flex flex-col items-center justify-center min-h-[400px]">
                              <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-6 rounded-2xl mb-4 relative border border-gray-200">
                                 <FolderX size={48} className="text-gray-500 z-10 relative" />

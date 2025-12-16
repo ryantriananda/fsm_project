@@ -31,18 +31,86 @@ export interface MasterItem {
   averagePrice: string;
 }
 
+export type ContractStatus = 'Draft' | 'Proposal' | 'Legal' | 'Finance' | 'Close' | 'Active';
+
+export interface BuildingComparisonItem {
+  id: string; // 'existing' | 'opt1' | 'opt2' | 'opt3'
+  type: 'Existing' | 'Option';
+  name: string;
+  address: string;
+  rentalPrice: string;
+  buildingSize: string;
+  landSize: string;
+  mapUrl: string;
+  pros: string;
+  cons: string;
+  pnlSummary: string; // e.g., "ROI 12%"
+  photos: string[]; // mock urls
+}
+
+export interface ContractWorkflowStep {
+  role: string; // 'BM', 'Regional', 'Jemmy Liem', 'DJ', 'Legal', 'FM', 'Accounting'
+  status: 'Pending' | 'Approved' | 'Rejected';
+  approverName?: string;
+  date?: string;
+  note?: string;
+}
+
 export interface ContractRecord {
   id: number;
   assetNumber: string;
   assetCategory: string;
+  name?: string; // Nama Gedung / Branch Name
   type: string;
-  ownership: string;
-  location: string;
-  channel: string;
-  department: string;
-  subLocation: string;
+  ownership: string; // 'Rent' | 'Own'
+  location: string; // Branch Location
   address: string;
-  status: 'Active' | 'Inactive';
+  status: ContractStatus;
+  
+  // Common Details
+  pic?: string; // Email based
+  picEmail?: string;
+  channel?: string;
+  department?: string;
+  subLocation?: string;
+
+  // Rent Details
+  landlord?: string;
+  ownerKtp?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  rentalCost?: string;
+  bankAccount?: string;
+
+  // Own Details
+  certificateNo?: string;
+  acquisitionDate?: string;
+  acquisitionValue?: string;
+  landArea?: string;
+  buildingArea?: string;
+
+  // Insurance & Maintenance
+  insuranceProvider?: string;
+  insurancePolicyNo?: string;
+  insuranceExpiry?: string;
+  insuranceCost?: string;
+  maintenanceVendor?: string;
+  maintenanceSchedule?: string;
+  maintenanceCost?: string;
+
+  // Branch Improvement Specifics
+  comparisons?: BuildingComparisonItem[];
+  documents?: {
+    imb?: boolean;
+    ktpOwner?: boolean;
+    suratKuasa?: boolean;
+    invoice?: boolean;
+    draftContract?: boolean;
+    signedContract?: boolean;
+    pnlFile?: boolean;
+  };
+  workflow?: ContractWorkflowStep[];
+  selectedOptionId?: string; // Which building was chosen
 }
 
 export interface TimesheetRecord {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCcw, Plus, Trash2, Image as ImageIcon, List, Calendar, DollarSign, Wrench, AlertCircle, CreditCard as CreditCardIcon, Upload } from 'lucide-react';
-import { VehicleRecord, ServiceRecord, MutationRecord, SalesRecord, SalesOffer, ContractRecord, GeneralMasterItem, MasterVendorRecord } from '../types';
+import { X, Plus, Trash2, Image as ImageIcon, List, DollarSign, Wrench, Upload, ShieldCheck, Home, FileText, CheckCircle, Clock, MapPin, BarChart2 } from 'lucide-react';
+import { VehicleRecord, ServiceRecord, MutationRecord, SalesRecord, SalesOffer, ContractRecord, GeneralMasterItem, MasterVendorRecord, BuildingComparisonItem } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -52,101 +52,56 @@ export const AddStockModal: React.FC<Props> = ({
     masterData = {},
     t
 }) => {
-  const [selectedDetail, setSelectedDetail] = useState<boolean>(false);
-  
-  // Local state for Vehicle form fields
-  const defaultVehicleForm: Partial<VehicleRecord> = {
-      noRegistrasi: '',
-      nama: '',
-      noPolisi: '',
-      channel: 'Human Capital Operation',
-      cabang: 'Pusat',
-      merek: 'TOYOTA',
-      tipeKendaraan: 'AVANZA',
-      jenis: '1.3 G',
-      model: 'A/T',
-      tahunPembuatan: '2022',
-      warna: 'Putih',
-      isiSilinder: '1329 CC',
-      noRangka: '',
-      noMesin: '',
-      pengguna: '',
-      noBpkb: '',
-      keteranganBpkb: '',
-      masaBerlaku1: '',
-      masaBerlaku5: '',
-      masaBerlakuKir: '',
-      tglBeli: '',
-      hargaBeli: '',
-      noPolisAsuransi: '',
-      jangkaPertanggungan: ''
-  };
-
-  // Local state for Service Request form
-  const defaultServiceForm: Partial<ServiceRecord> = {
-      aset: '',
-      tglStnk: '',
-      jenisServis: 'Servis Rutin',
-      vendor: '',
-      targetSelesai: '',
-      kmKendaraan: '',
-      masalah: '',
-      penyebab: '',
-      estimasiBiaya: '',
-      jenisPembayaran: 'Kasbon',
-      namaBank: '',
-      nomorRekening: ''
-  };
-
-  // Local state for Mutation Request form
-  const defaultMutationForm: Partial<MutationRecord> = {
-      tipeMutasi: 'Kirim',
-      lokasiAsal: '',
-      lokasiTujuan: '',
-      channelAsal: '',
-      channelTujuan: '',
-      asetId: '',
-      alasan: ''
-  };
-
-  // Local state for Sales Request form
-  const defaultSalesForm: Partial<SalesRecord> = {
-    asetId: '',
-    targetSelesai: '',
-    alasan: '',
-    catatan: '',
-    offers: []
-  };
+  const [activeTab, setActiveTab] = useState('general'); // For Contract Modal: 'general', 'proposal', 'workflow', 'documents'
 
   // Local state for Contract (Building) form
   const defaultContractForm: Partial<ContractRecord> = {
     assetNumber: '[Auto Generate]',
     assetCategory: 'Building',
-    type: '',
+    name: '',
+    type: 'Office',
     ownership: 'Rent',
     location: '',
     channel: '',
     department: '',
     subLocation: '',
-    address: ''
+    address: '',
+    pic: '',
+    status: 'Draft',
+    // Rent specific
+    landlord: '',
+    periodStart: '',
+    periodEnd: '',
+    rentalCost: '',
+    // Own specific
+    certificateNo: '',
+    acquisitionDate: '',
+    acquisitionValue: '',
+    landArea: '',
+    buildingArea: '',
+    // Insurance & Maintenance
+    insuranceProvider: '',
+    insurancePolicyNo: '',
+    insuranceExpiry: '',
+    insuranceCost: '',
+    maintenanceVendor: '',
+    maintenanceSchedule: '',
+    maintenanceCost: '',
+    // Proposal Default
+    comparisons: [
+        { id: 'existing', type: 'Existing', name: 'Existing Building', address: '', rentalPrice: '', buildingSize: '', landSize: '', mapUrl: '', pros: '', cons: '', pnlSummary: '', photos: [] },
+        { id: 'opt1', type: 'Option', name: 'Option 1', address: '', rentalPrice: '', buildingSize: '', landSize: '', mapUrl: '', pros: '', cons: '', pnlSummary: '', photos: [] },
+        { id: 'opt2', type: 'Option', name: 'Option 2', address: '', rentalPrice: '', buildingSize: '', landSize: '', mapUrl: '', pros: '', cons: '', pnlSummary: '', photos: [] },
+        { id: 'opt3', type: 'Option', name: 'Option 3', address: '', rentalPrice: '', buildingSize: '', landSize: '', mapUrl: '', pros: '', cons: '', pnlSummary: '', photos: [] },
+    ]
   };
 
-  // Local state for General Master form
-  const defaultMasterForm: Partial<GeneralMasterItem> = {
-    name: ''
-  };
-
-  // Local state for Master Vendor form
-  const defaultMasterVendorForm: Partial<MasterVendorRecord> = {
-      nama: '',
-      merek: '',
-      alamat: '',
-      noTelp: '',
-      tipe: 'Vendor Servis',
-      cabang: 'Aceh',
-      aktif: true,
-      pic: ''
-  };
+  const defaultVehicleForm: Partial<VehicleRecord> = { status: 'Aktif', channel: 'Human Capital Operation', cabang: 'Pusat' };
+  const defaultServiceForm: Partial<ServiceRecord> = { jenisServis: 'Servis Rutin', jenisPembayaran: 'Kasbon' };
+  const defaultMutationForm: Partial<MutationRecord> = { tipeMutasi: 'Kirim' };
+  const defaultSalesForm: Partial<SalesRecord> = { offers: [] };
+  const defaultMasterForm: Partial<GeneralMasterItem> = { name: '' };
+  const defaultMasterVendorForm: Partial<MasterVendorRecord> = { aktif: true };
 
   const [vehicleForm, setVehicleForm] = useState<Partial<VehicleRecord>>(defaultVehicleForm);
   const [serviceForm, setServiceForm] = useState<Partial<ServiceRecord>>(defaultServiceForm);
@@ -157,9 +112,7 @@ export const AddStockModal: React.FC<Props> = ({
   const [masterVendorForm, setMasterVendorForm] = useState<Partial<MasterVendorRecord>>(defaultMasterVendorForm);
   const [salesOffers, setSalesOffers] = useState<SalesOffer[]>([{ nama: '', pic: '', phone: '', price: '' }]);
 
-  // Derived state for mutation asset details
-  const [selectedMutationAsset, setSelectedMutationAsset] = useState<VehicleRecord | null>(null);
-  // Derived state for service asset details
+  // Derived state
   const [selectedServiceAsset, setSelectedServiceAsset] = useState<VehicleRecord | null>(null);
 
   useEffect(() => {
@@ -168,35 +121,21 @@ export const AddStockModal: React.FC<Props> = ({
             if (initialVehicleData) setVehicleForm(initialVehicleData);
             if (initialServiceData) {
                 setServiceForm(initialServiceData);
-                if (initialServiceData.aset || initialServiceData.id) {
-                     // Try to match by ID or any logic available, data might need to carry asset ID better
-                     // Assuming 'aset' in service record holds vehicle ID in string
+                if (initialServiceData.aset) {
                      const asset = vehicleList.find(v => v.id.toString() === initialServiceData.aset);
                      setSelectedServiceAsset(asset || null);
                 }
             }
-            if (initialMutationData) {
-                setMutationForm(initialMutationData);
-                if (initialMutationData.asetId) {
-                    const asset = vehicleList.find(v => v.id.toString() === initialMutationData.asetId);
-                    setSelectedMutationAsset(asset || null);
-                }
-            }
+            if (initialMutationData) setMutationForm(initialMutationData);
             if (initialSalesData) {
                 setSalesForm(initialSalesData);
-                if (initialSalesData.offers && initialSalesData.offers.length > 0) {
-                    setSalesOffers(initialSalesData.offers);
-                }
+                if (initialSalesData.offers) setSalesOffers(initialSalesData.offers);
             }
             if (initialContractData) {
-                setContractForm(initialContractData);
+                setContractForm({ ...defaultContractForm, ...initialContractData });
             }
-            if (initialMasterData) {
-                setMasterForm(initialMasterData);
-            }
-            if (initialMasterVendorData) {
-                setMasterVendorForm(initialMasterVendorData);
-            }
+            if (initialMasterData) setMasterForm(initialMasterData);
+            if (initialMasterVendorData) setMasterVendorForm(initialMasterVendorData);
         } else {
             // Reset to defaults
             setVehicleForm(defaultVehicleForm);
@@ -207,16 +146,13 @@ export const AddStockModal: React.FC<Props> = ({
             setMasterForm(defaultMasterForm);
             setMasterVendorForm(defaultMasterVendorForm);
             setSalesOffers([{ nama: '', pic: '', phone: '', price: '' }]);
-            setSelectedMutationAsset(null);
             setSelectedServiceAsset(null);
         }
+        setActiveTab('general');
     }
-  }, [isOpen, initialVehicleData, initialServiceData, initialMutationData, initialSalesData, initialContractData, initialMasterData, initialMasterVendorData, mode]);
+  }, [isOpen, initialVehicleData, initialServiceData, initialContractData, mode]);
 
-  const handleVehicleChange = (field: keyof VehicleRecord, value: string) => {
-      setVehicleForm(prev => ({ ...prev, [field]: value }));
-  };
-
+  const handleVehicleChange = (field: keyof VehicleRecord, value: string) => setVehicleForm(prev => ({ ...prev, [field]: value }));
   const handleServiceChange = (field: keyof ServiceRecord, value: string) => {
       setServiceForm(prev => ({ ...prev, [field]: value }));
       if (field === 'aset') {
@@ -224,95 +160,50 @@ export const AddStockModal: React.FC<Props> = ({
           setSelectedServiceAsset(asset || null);
       }
   };
-
-  const handleMutationChange = (field: keyof MutationRecord, value: string) => {
-      setMutationForm(prev => ({ ...prev, [field]: value }));
-      if (field === 'asetId') {
-          const asset = vehicleList.find(v => v.id.toString() === value);
-          setSelectedMutationAsset(asset || null);
-      }
-  };
-
-  const handleSalesChange = (field: keyof SalesRecord, value: string) => {
-      setSalesForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleContractChange = (field: keyof ContractRecord, value: string) => {
+  const handleMutationChange = (field: keyof MutationRecord, value: string) => setMutationForm(prev => ({ ...prev, [field]: value }));
+  const handleSalesChange = (field: keyof SalesRecord, value: string) => setSalesForm(prev => ({ ...prev, [field]: value }));
+  
+  const handleContractChange = (field: keyof ContractRecord, value: any) => {
       setContractForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleMasterChange = (value: string) => {
-      setMasterForm(prev => ({ ...prev, name: value }));
-  }
-
-  const handleMasterVendorChange = (field: keyof MasterVendorRecord, value: any) => {
-      setMasterVendorForm(prev => ({ ...prev, [field]: value }));
-  }
-
-  const handleOfferChange = (index: number, field: keyof SalesOffer, value: string) => {
-      const newOffers = [...salesOffers];
-      newOffers[index] = { ...newOffers[index], [field]: value };
-      setSalesOffers(newOffers);
-  };
-
-  const addOfferRow = () => {
-      setSalesOffers([...salesOffers, { nama: '', pic: '', phone: '', price: '' }]);
-  };
-
-  const removeOfferRow = (index: number) => {
-      if (salesOffers.length > 1) {
-          setSalesOffers(salesOffers.filter((_, i) => i !== index));
+      // Logic Difference: If Own, we reset tab to General because Proposal/Workflow tabs will be hidden
+      if (field === 'ownership' && value === 'Own') {
+          setActiveTab('general');
       }
   };
+  
+  const handleMasterChange = (value: string) => setMasterForm(prev => ({ ...prev, name: value }));
+  const handleMasterVendorChange = (field: keyof MasterVendorRecord, value: any) => setMasterVendorForm(prev => ({ ...prev, [field]: value }));
+  
+  const handleComparisonChange = (id: string, field: keyof BuildingComparisonItem, value: string) => {
+      setContractForm(prev => ({
+          ...prev,
+          comparisons: prev.comparisons?.map(c => c.id === id ? { ...c, [field]: value } : c)
+      }));
+  };
+
+  const addOfferRow = () => setSalesOffers([...salesOffers, { nama: '', pic: '', phone: '', price: '' }]);
 
   const handleSave = () => {
-      if (moduleName === 'Daftar Aset' && onSaveVehicle) {
-          onSaveVehicle(vehicleForm);
-      } else if (moduleName === 'Servis' && onSaveService) {
-          onSaveService(serviceForm);
-      } else if (moduleName === 'Mutasi' && onSaveMutation) {
-          onSaveMutation(mutationForm);
-      } else if (moduleName === 'Penjualan' && onSaveSales) {
-          onSaveSales({ ...salesForm, offers: salesOffers });
-      } else if (moduleName === 'Contract' && onSaveContract) {
-          onSaveContract(contractForm);
-      } else if (moduleName === 'Master Vendor' && onSaveMasterVendor) {
-          onSaveMasterVendor(masterVendorForm);
-      } else if (onSaveMaster) {
-          onSaveMaster(masterForm);
-      }
+      if (moduleName === 'Contract' && onSaveContract) onSaveContract(contractForm);
+      else if (moduleName === 'Daftar Aset' && onSaveVehicle) onSaveVehicle(vehicleForm);
+      else if (moduleName === 'Servis' && onSaveService) onSaveService(serviceForm);
+      else if (moduleName === 'Mutasi' && onSaveMutation) onSaveMutation(mutationForm);
+      else if (moduleName === 'Penjualan' && onSaveSales) onSaveSales({ ...salesForm, offers: salesOffers });
+      else if (moduleName === 'Master Vendor' && onSaveMasterVendor) onSaveMasterVendor(masterVendorForm);
+      else if (onSaveMaster) onSaveMaster(masterForm);
       onClose();
   };
 
   if (!isOpen) return null;
 
   const isContract = moduleName === 'Contract';
-  const isVendor = moduleName === 'Vendor';
   const isVehicle = moduleName === 'Daftar Aset';
   const isService = moduleName === 'Servis';
   const isMutation = moduleName === 'Mutasi';
   const isSales = moduleName === 'Penjualan';
   const isMasterVendor = moduleName === 'Master Vendor';
-  
-  const isMaster = !isContract && !isVendor && !isVehicle && !isService && !isMutation && !isSales && !isMasterVendor && !moduleName?.includes('ATK') && !moduleName?.includes('ARK') && moduleName !== 'Timesheet';
-
+  const isMaster = !isContract && !isVehicle && !isService && !isMutation && !isSales && !isMasterVendor && moduleName?.includes('Master');
   const isViewMode = mode === 'view';
-  const isEditMode = mode === 'edit';
-
-  const getTitle = () => {
-    if (isContract) return mode === 'create' ? t.addAsset : t.assetList;
-    if (isVendor) return 'Master Vendor > New Vendor';
-    if (isMasterVendor) return t.addVendor;
-    if (isVehicle) return mode === 'create' ? `${t.vehicleAssetList} > ${t.new}` : t.vehicleAssetList;
-    if (isService) return t.createRequest;
-    if (isMutation) return t.createRequest;
-    if (isSales) return t.createRequest;
-    if (isMaster) return `Master ${moduleName}`;
-    return `Master ${moduleName} > ${t.add}`;
-  }
-
-  // Helper for red asterisk
-  const Required = () => <span className="text-red-500">*</span>;
 
   // Helper for section header
   const SectionHeader: React.FC<{ title: string; orange?: boolean; icon?: React.ReactNode }> = ({ title, orange, icon }) => (
@@ -325,556 +216,380 @@ export const AddStockModal: React.FC<Props> = ({
   return (
     <>
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-      <div className={`bg-white w-full ${isMaster ? 'max-w-md' : (isVehicle || isService || isMutation || isSales || isContract || isMasterVendor ? 'max-w-7xl' : 'max-w-5xl')} rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]`}>
+      <div className={`bg-white w-full ${isContract ? 'max-w-[95vw] h-[90vh]' : (isVehicle || isService || isMutation || isSales ? 'max-w-7xl' : 'max-w-xl')} rounded-lg shadow-xl overflow-hidden flex flex-col`}>
+        
         {/* Modal Header */}
-        <div className={`px-6 py-4 flex items-center justify-between ${isService || isMutation || isSales || isContract || isMaster || isMasterVendor ? 'bg-white border-b border-gray-200 text-gray-900' : 'bg-black text-white'}`}>
-          <h2 className="text-sm font-bold tracking-wide">
-            {getTitle()}
-          </h2>
-          <div className="flex items-center gap-4">
-            <button className={`${isService || isMutation || isSales || isContract || isMaster || isMasterVendor ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-white'} transition-colors`}>
-              <X size={20} onClick={onClose} className="cursor-pointer"/>
-            </button>
+        <div className="px-6 py-4 bg-white border-b border-gray-200 flex items-center justify-between">
+          <div>
+              <h2 className="text-lg font-bold tracking-wide text-gray-900">
+                {isContract ? (mode === 'create' ? 'New Branch Improvement' : contractForm.name) : 
+                 isVehicle ? 'Vehicle Asset' : 
+                 isService ? 'Service Request' : 
+                 moduleName}
+              </h2>
+              {isContract && (
+                  <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
+                          contractForm.status === 'Draft' ? 'bg-gray-100 text-gray-600 border-gray-300' :
+                          contractForm.status === 'Proposal' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                          'bg-green-50 text-green-600 border-green-200'
+                      }`}>
+                          {contractForm.status}
+                      </span>
+                      <span className="text-xs text-gray-400">|</span>
+                      <span className="text-xs text-gray-500">Asset No: {contractForm.assetNumber}</span>
+                  </div>
+              )}
           </div>
+          <button className="text-gray-400 hover:text-black transition-colors">
+            <X size={24} onClick={onClose} className="cursor-pointer"/>
+          </button>
         </div>
 
+        {/* Contract Specific Tabs */}
+        {isContract && (
+            <div className="bg-gray-50 border-b border-gray-200 px-6 flex gap-6">
+                {/* Dynamically filter tabs: 'Own' does not need Proposal or Workflow */}
+                {(contractForm.ownership === 'Rent' 
+                    ? ['General', 'Proposal & Comparison', 'Workflow', 'Documents'] 
+                    : ['General', 'Documents']
+                ).map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab.toLowerCase().split(' ')[0])}
+                        className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                            activeTab === tab.toLowerCase().split(' ')[0]
+                            ? 'border-black text-black'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
+            </div>
+        )}
+
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50 custom-scrollbar">
           
-          {isMaster ? (
-              /* --- GENERIC MASTER FORM --- */
-              <div className="space-y-4">
-                  <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Name <Required/></label>
-                      <input 
-                          type="text" 
-                          className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black" 
-                          value={masterForm.name || ''}
-                          onChange={(e) => handleMasterChange(e.target.value)}
-                          placeholder={`Enter ${moduleName} Name`}
-                      />
-                  </div>
-              </div>
-
-          ) : isMasterVendor ? (
-            /* --- MASTER VENDOR FORM --- */
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Nama Vendor <Required/></label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.nama} onChange={(e) => handleMasterVendorChange('nama', e.target.value)} disabled={isViewMode} />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Merek</label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.merek} onChange={(e) => handleMasterVendorChange('merek', e.target.value)} disabled={isViewMode} />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">PIC <Required/></label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.pic} onChange={(e) => handleMasterVendorChange('pic', e.target.value)} disabled={isViewMode} />
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">No Telp <Required/></label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.noTelp} onChange={(e) => handleMasterVendorChange('noTelp', e.target.value)} disabled={isViewMode} />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Alamat <Required/></label>
-                        <textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" rows={3} value={masterVendorForm.alamat} onChange={(e) => handleMasterVendorChange('alamat', e.target.value)} disabled={isViewMode}></textarea>
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Vendor <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.tipe} onChange={(e) => handleMasterVendorChange('tipe', e.target.value)} disabled={isViewMode}>
-                            <option value="Vendor Servis">Vendor Servis</option>
-                            <option value="Vendor Mutasi">Vendor Mutasi</option>
-                            <option value="Vendor Pajak & KIR">Vendor Pajak & KIR</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Cabang Code <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={masterVendorForm.cabang} onChange={(e) => handleMasterVendorChange('cabang', e.target.value)} disabled={isViewMode}>
-                            <option value="Aceh">Aceh</option>
-                            <option value="Pusat">Pusat</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-          ) : isContract ? (
-            /* --- CONTRACT (BUILDING ASSET) FORM --- */
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                {/* ... existing contract fields ... */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Asset Number</label>
-                         <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-400 italic focus:outline-none" value={contractForm.assetNumber || '[Auto Generate]'} readOnly />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Asset Category</label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.assetCategory || 'Building'} onChange={(e) => handleContractChange('assetCategory', e.target.value)} disabled={isViewMode} />
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Type <Required/></label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.type || ''} onChange={(e) => handleContractChange('type', e.target.value)} disabled={isViewMode} />
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Ownership</label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.ownership || 'Rent'} onChange={(e) => handleContractChange('ownership', e.target.value)} disabled={isViewMode}>
-                            <option value="Rent">Rent</option>
-                            <option value="Owner">Owner</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Asset Location <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.location || ''} onChange={(e) => handleContractChange('location', e.target.value)} disabled={isViewMode}>
-                            <option value="">Select...</option>
-                             <option value="Pusat">Pusat</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Channel <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.channel || ''} onChange={(e) => handleContractChange('channel', e.target.value)} disabled={isViewMode}>
-                            <option value="">Select...</option>
-                            <option value="Human Capital">Human Capital</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Department <Required/></label>
-                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.department || ''} onChange={(e) => handleContractChange('department', e.target.value)} disabled={isViewMode}>
-                            <option value="">Select...</option>
-                             <option value="IT">IT</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Sub Location</label>
-                        <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={contractForm.subLocation || ''} onChange={(e) => handleContractChange('subLocation', e.target.value)} disabled={isViewMode} />
-                    </div>
-                     <div className="md:col-span-2">
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Address</label>
-                        <textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" rows={3} placeholder="(max. 255 characters)" value={contractForm.address || ''} onChange={(e) => handleContractChange('address', e.target.value)} disabled={isViewMode}></textarea>
-                    </div>
-                </div>
-            </div>
-
-          ) : isService ? (
-            /* --- SERVICE REQUEST FORM (Expanded with Detailed Inputs) --- */
-            <div className="space-y-6">
-                {/* 1. Vehicle Information */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title={t.detailInfo} icon={<List size={18} />} />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-2">
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Aset / Kendaraan <Required/></label>
-                             <select 
-                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
-                                value={serviceForm.aset || ''} 
-                                onChange={(e) => handleServiceChange('aset', e.target.value)} 
-                                disabled={isViewMode}
-                             >
-                                <option value="">(Pilih Kendaraan)</option>
-                                {vehicleList.map(v => ( 
-                                    <option key={v.id} value={v.id}>{v.noPolisi} - {v.nama}</option> 
-                                ))}
-                             </select>
-                        </div>
-                        
-                        {/* Auto-populated Vehicle Details */}
-                        {selectedServiceAsset && (
-                            <div className="md:col-span-2 bg-gray-50 p-4 rounded border border-gray-100 grid grid-cols-3 gap-4 text-xs">
-                                <div>
-                                    <span className="block text-gray-500">Merek/Tipe</span>
-                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.merek} {selectedServiceAsset.tipeKendaraan}</span>
+          {isContract ? (
+            <>
+                {/* --- TAB: GENERAL --- */}
+                {activeTab === 'general' && (
+                    <div className="flex flex-col gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <SectionHeader title={t.detailInfo} icon={<Home size={18} />} />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">{t.buildingName} <span className="text-red-500">*</span></label>
+                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:border-black" value={contractForm.name} onChange={(e) => handleContractChange('name', e.target.value)} disabled={isViewMode} />
                                 </div>
                                 <div>
-                                    <span className="block text-gray-500">Pengguna</span>
-                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.pengguna || '-'}</span>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                                    <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:border-black" value={contractForm.type} onChange={(e) => handleContractChange('type', e.target.value)} disabled={isViewMode}>
+                                        <option value="Office">Office</option>
+                                        <option value="Warehouse">Warehouse</option>
+                                        <option value="Head Office">Head Office</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <span className="block text-gray-500">Cabang</span>
-                                    <span className="font-semibold text-gray-700">{selectedServiceAsset.cabang}</span>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Ownership</label>
+                                    <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:border-black" value={contractForm.ownership} onChange={(e) => handleContractChange('ownership', e.target.value)} disabled={isViewMode}>
+                                        <option value="Rent">Rent (Sewa)</option>
+                                        <option value="Own">Own (Milik Sendiri)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
+                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:border-black" value={contractForm.location} onChange={(e) => handleContractChange('location', e.target.value)} disabled={isViewMode} />
+                                </div>
+                                 <div className="md:col-span-3">
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Address</label>
+                                    <textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:border-black" rows={2} value={contractForm.address} onChange={(e) => handleContractChange('address', e.target.value)} disabled={isViewMode} />
                                 </div>
                             </div>
-                        )}
-
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">{t.odometer} <Required/></label>
-                            <input type="text" placeholder="ex: 12000" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.kmKendaraan || ''} onChange={(e) => handleServiceChange('kmKendaraan', e.target.value)} disabled={isViewMode} />
                         </div>
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Tanggal STNK</label>
-                             <input type="text" placeholder="dd/mm/yyyy" className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-500 cursor-not-allowed focus:outline-none" value={serviceForm.tglStnk || '-'} disabled />
+
+                        {/* Ownership Specifics */}
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            {contractForm.ownership === 'Rent' ? (
+                                <>
+                                    <SectionHeader title="Rental Details" icon={<DollarSign size={18} />} />
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Landlord Name</label>
+                                            <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.landlord} onChange={(e) => handleContractChange('landlord', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Rental Cost</label>
+                                            <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.rentalCost} onChange={(e) => handleContractChange('rentalCost', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Bank Account</label>
+                                            <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.bankAccount} onChange={(e) => handleContractChange('bankAccount', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                                            <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.periodStart} onChange={(e) => handleContractChange('periodStart', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                                            <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.periodEnd} onChange={(e) => handleContractChange('periodEnd', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div className="flex items-center mt-6">
+                                            <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-3 py-2 rounded-md border border-orange-200 w-full">
+                                                <Clock size={16} />
+                                                <span className="text-xs font-medium">Auto-reminder active (H-6 Months)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <SectionHeader title="Ownership Details" icon={<DollarSign size={18} />} />
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Certificate No (SHM/HGB)</label>
+                                            <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.certificateNo} onChange={(e) => handleContractChange('certificateNo', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">Acquisition Value</label>
+                                            <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={contractForm.acquisitionValue} onChange={(e) => handleContractChange('acquisitionValue', e.target.value)} disabled={isViewMode} />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* 2. Service Details */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title={t.service} icon={<Wrench size={18} />} />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Jenis Servis <Required/></label>
-                             <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.jenisServis} onChange={(e) => handleServiceChange('jenisServis', e.target.value)} disabled={isViewMode}>
-                                {(masterData['Jenis Servis'] || []).map(m => (
-                                    <option key={m.id} value={m.name}>{m.name}</option>
+                {/* --- TAB: PROPOSAL & COMPARISON --- */}
+                {activeTab === 'proposal' && (
+                    <div className="flex flex-col gap-6">
+                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-start gap-3">
+                            <div className="bg-blue-100 p-2 rounded-full text-blue-600"><BarChart2 size={20} /></div>
+                            <div>
+                                <h4 className="text-sm font-bold text-blue-900">Proposal Comparison Matrix</h4>
+                                <p className="text-xs text-blue-700 mt-1">
+                                    Each proposal must include 1 Existing building and 3 Alternative options. 
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto pb-4">
+                            <div className="min-w-[1000px] grid grid-cols-4 gap-4">
+                                {contractForm.comparisons?.map((item, idx) => (
+                                    <div key={item.id} className={`bg-white rounded-lg border ${item.id === 'existing' ? 'border-gray-300' : 'border-blue-200 shadow-sm'} flex flex-col`}>
+                                        <div className={`p-3 border-b ${item.id === 'existing' ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-blue-800'} font-bold text-sm text-center uppercase`}>
+                                            {item.type} {item.id !== 'existing' && `#${idx}`}
+                                        </div>
+                                        <div className="p-4 flex flex-col gap-4 flex-1">
+                                            {/* Photos */}
+                                            <div className="aspect-video bg-gray-100 rounded-md flex flex-col items-center justify-center border border-dashed border-gray-300 relative overflow-hidden group cursor-pointer hover:bg-gray-200 transition-colors">
+                                                {item.photos && item.photos.length > 0 ? (
+                                                    <img src={item.photos[0]} className="w-full h-full object-cover" alt="Building" />
+                                                ) : (
+                                                    <>
+                                                        <ImageIcon size={24} className="text-gray-400 mb-1" />
+                                                        <span className="text-[10px] text-gray-500">Add Photo</span>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Fields */}
+                                            <div>
+                                                <label className="text-[10px] font-bold text-gray-500 uppercase">Building Name</label>
+                                                <input type="text" className="w-full border-b border-gray-200 focus:border-blue-500 outline-none text-sm py-1 font-medium" placeholder="Building Name" value={item.name} onChange={(e) => handleComparisonChange(item.id, 'name', e.target.value)} />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-bold text-gray-500 uppercase">Address & Map</label>
+                                                <input type="text" className="w-full border-b border-gray-200 focus:border-blue-500 outline-none text-sm py-1" placeholder="Full Address" value={item.address} onChange={(e) => handleComparisonChange(item.id, 'address', e.target.value)} />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase">Price / Year</label>
+                                                    <input type="text" className="w-full border-b border-gray-200 focus:border-blue-500 outline-none text-sm py-1" placeholder="Rp" value={item.rentalPrice} onChange={(e) => handleComparisonChange(item.id, 'rentalPrice', e.target.value)} />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase">Size (m2)</label>
+                                                    <input type="text" className="w-full border-b border-gray-200 focus:border-blue-500 outline-none text-sm py-1" placeholder="Total" value={item.buildingSize} onChange={(e) => handleComparisonChange(item.id, 'buildingSize', e.target.value)} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-bold text-gray-500 uppercase">P&L Summary</label>
+                                                <input type="text" className="w-full border-b border-gray-200 focus:border-blue-500 outline-none text-sm py-1 font-semibold text-green-600" placeholder="e.g. ROI 15%" value={item.pnlSummary} onChange={(e) => handleComparisonChange(item.id, 'pnlSummary', e.target.value)} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
-                                {!masterData['Jenis Servis']?.length && <option value="Servis Rutin">Servis Rutin</option>}
-                             </select>
-                        </div>
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.targetDate} <Required/></label>
-                             <div className="relative">
-                                <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.targetSelesai || ''} onChange={(e) => handleServiceChange('targetSelesai', e.target.value)} disabled={isViewMode} />
-                             </div>
-                        </div>
-                        
-                        <div className="md:col-span-2">
-                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.problem} <Required/></label>
-                             <textarea 
-                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
-                                rows={3} 
-                                placeholder="Jelaskan keluhan atau masalah pada kendaraan..."
-                                value={serviceForm.masalah || ''} 
-                                onChange={(e) => handleServiceChange('masalah', e.target.value)} 
-                                disabled={isViewMode}
-                             />
-                        </div>
-                        <div className="md:col-span-2">
-                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.cause}</label>
-                             <textarea 
-                                className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" 
-                                rows={2} 
-                                placeholder="Analisa penyebab kerusakan (jika ada)..."
-                                value={serviceForm.penyebab || ''} 
-                                onChange={(e) => handleServiceChange('penyebab', e.target.value)} 
-                                disabled={isViewMode}
-                             />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3. Cost & Payment */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                     <SectionHeader title="Biaya & Pembayaran" icon={<DollarSign size={18} />} />
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.vendorName} <Required/></label>
-                             <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.vendor || ''} onChange={(e) => handleServiceChange('vendor', e.target.value)} disabled={isViewMode} placeholder="Pilih atau ketik nama vendor" />
-                        </div>
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">{t.estimatedCost} <Required/></label>
-                             <div className="relative">
-                                <span className="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded pl-8 pr-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.estimasiBiaya || ''} onChange={(e) => handleServiceChange('estimasiBiaya', e.target.value)} disabled={isViewMode} />
-                             </div>
-                        </div>
-                        <div>
-                             <label className="block text-xs font-medium text-gray-600 mb-1">Jenis Pembayaran <Required/></label>
-                              <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.jenisPembayaran} onChange={(e) => handleServiceChange('jenisPembayaran', e.target.value)} disabled={isViewMode}>
-                                {(masterData['Jenis Pembayaran'] || []).map(m => (
-                                    <option key={m.id} value={m.name}>{m.name}</option>
-                                ))}
-                                {!masterData['Jenis Pembayaran']?.length && <option value="Kasbon">Kasbon</option>}
-                             </select>
-                        </div>
-
-                        {/* Bank Details */}
-                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 mt-2">
-                             <div>
-                                 <label className="block text-xs font-medium text-gray-600 mb-1">{t.bankName}</label>
-                                 <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.namaBank || ''} onChange={(e) => handleServiceChange('namaBank', e.target.value)} disabled={isViewMode} />
-                             </div>
-                             <div>
-                                 <label className="block text-xs font-medium text-gray-600 mb-1">{t.accountNumber}</label>
-                                 <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={serviceForm.nomorRekening || ''} onChange={(e) => handleServiceChange('nomorRekening', e.target.value)} disabled={isViewMode} />
-                             </div>
-                        </div>
-
-                        {/* Invoice Attachment */}
-                         <div className="md:col-span-2 mt-2">
-                            <label className="block text-xs font-medium text-gray-600 mb-1">{t.invoiceAttachment}</label>
-                            <div className={`border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center transition-colors relative ${!isViewMode ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-70 cursor-default'}`}>
-                                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-default" disabled={isViewMode} />
-                                <div className="bg-gray-100 p-3 rounded-full mb-3">
-                                    <Upload size={24} className="text-gray-500" />
-                                </div>
-                                <p className="text-sm font-medium text-gray-900">{t.dragDrop}</p>
-                                <p className="text-xs text-gray-500 mt-1">PDF, PNG, JPG up to 10MB</p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                )}
+
+                {/* --- TAB: WORKFLOW --- */}
+                {activeTab === 'workflow' && (
+                    <div className="max-w-3xl mx-auto">
+                        <SectionHeader title="Approval Workflow" icon={<CheckCircle size={18} />} />
+                        <div className="relative border-l-2 border-gray-200 ml-4 space-y-8 my-8">
+                            {contractForm.workflow?.map((step, idx) => (
+                                <div key={idx} className="relative pl-8">
+                                    <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 ${
+                                        step.status === 'Approved' ? 'bg-green-500 border-green-500' : 
+                                        step.status === 'Rejected' ? 'bg-red-500 border-red-500' : 
+                                        'bg-white border-gray-300'
+                                    }`}></div>
+                                    
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h4 className="font-bold text-sm text-gray-900">{step.role}</h4>
+                                                <p className="text-xs text-gray-500">{step.approverName || '-'}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                                                step.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                step.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                                'bg-gray-100 text-gray-500'
+                                            }`}>
+                                                {step.status}
+                                            </span>
+                                        </div>
+                                        {step.date && <p className="text-xs text-gray-400 flex items-center gap-1 mb-2"><Clock size={10}/> {step.date}</p>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* --- TAB: DOCUMENTS --- */}
+                {activeTab === 'documents' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <SectionHeader title="Legal Documents" icon={<FileText size={18} />} />
+                            <div className="space-y-4">
+                                {['IMB / PBG', 'KTP Pemilik', 'Surat Kuasa (Power of Attorney)', 'Draft Sewa (Legal Reviewed)'].map((doc, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 border border-gray-100 rounded bg-gray-50">
+                                        <span className="text-sm font-medium text-gray-700">{doc}</span>
+                                        <button className="text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1">
+                                            <Upload size={14} /> Upload
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                            <SectionHeader title="Finance Documents" icon={<DollarSign size={18} />} />
+                            <div className="space-y-4">
+                                {['Invoice / Kuitansi', 'NPWP Pemilik', 'Bukti Potong Pajak', 'Final Signed Contract'].map((doc, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 border border-gray-100 rounded bg-gray-50">
+                                        <span className="text-sm font-medium text-gray-700">{doc}</span>
+                                        <button className="text-blue-600 hover:text-blue-800 text-xs font-bold flex items-center gap-1">
+                                            <Upload size={14} /> Upload
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </>
           ) : isVehicle ? (
-            /* --- VEHICLE FORM (Updated with Dynamic Masters) --- */
+            /* --- VEHICLE FORM --- */
             <div className="flex flex-col gap-6">
-                {/* Row 1: Detail Informasi & Surat */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Column 1: Detail Informasi */}
                     <div className="space-y-4">
                         <SectionHeader title={t.detailInfo} />
                         <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">No. Registrasi <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noRegistrasi || ''} onChange={(e) => handleVehicleChange('noRegistrasi', e.target.value)} />
-                            </div>
-                            <div className="col-span-2">
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Deskripsi Lengkap <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.nama || ''} onChange={(e) => handleVehicleChange('nama', e.target.value)} />
-                            </div>
+                            <div><label className="block text-xs font-medium text-gray-600 mb-1">No. Registrasi *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.noRegistrasi} onChange={(e) => handleVehicleChange('noRegistrasi', e.target.value)} /></div>
+                            <div className="col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Deskripsi Lengkap *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.nama} onChange={(e) => handleVehicleChange('nama', e.target.value)} /></div>
                         </div>
-
-                         <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">No. Polisi <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noPolisi || ''} onChange={(e) => handleVehicleChange('noPolisi', e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Merek <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.merek || ''} onChange={(e) => handleVehicleChange('merek', e.target.value)} />
-                            </div>
-                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Kendaraan <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.tipeKendaraan || ''} onChange={(e) => handleVehicleChange('tipeKendaraan', e.target.value)} />
-                            </div>
-                        </div>
-
                         <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Jenis <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.jenis || ''} onChange={(e) => handleVehicleChange('jenis', e.target.value)} />
-                            </div>
-                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Model <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.model || ''} onChange={(e) => handleVehicleChange('model', e.target.value)} />
-                            </div>
-                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Tahun Pembuatan <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.tahunPembuatan || ''} onChange={(e) => handleVehicleChange('tahunPembuatan', e.target.value)} />
-                            </div>
+                            <div><label className="block text-xs font-medium text-gray-600 mb-1">No. Polisi *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.noPolisi} onChange={(e) => handleVehicleChange('noPolisi', e.target.value)} /></div>
+                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Merek *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.merek} onChange={(e) => handleVehicleChange('merek', e.target.value)} /></div>
+                            <div><label className="block text-xs font-medium text-gray-600 mb-1">Tipe *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.tipeKendaraan} onChange={(e) => handleVehicleChange('tipeKendaraan', e.target.value)} /></div>
                         </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Warna <Required/></label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.warna || ''} onChange={(e) => handleVehicleChange('warna', e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Isi Silinder</label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.isiSilinder || ''} onChange={(e) => handleVehicleChange('isiSilinder', e.target.value)} />
-                            </div>
+                        <div className="grid grid-cols-2 gap-4">
+                             <div><label className="block text-xs font-medium text-gray-600 mb-1">No. Rangka</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.noRangka} onChange={(e) => handleVehicleChange('noRangka', e.target.value)} /></div>
+                             <div><label className="block text-xs font-medium text-gray-600 mb-1">No. Mesin</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.noMesin} onChange={(e) => handleVehicleChange('noMesin', e.target.value)} /></div>
                         </div>
-
-                         <div className="grid grid-cols-2 gap-4">
-                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">No. Rangka</label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noRangka || ''} onChange={(e) => handleVehicleChange('noRangka', e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">No. Mesin</label>
-                                <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noMesin || ''} onChange={(e) => handleVehicleChange('noMesin', e.target.value)} />
-                            </div>
-                        </div>
-                        
-                         {/* Pengguna Section */}
-                        <div className="mt-4">
-                            <SectionHeader title={t.users} />
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Channel <Required/></label>
-                                    <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.channel || ''} onChange={(e) => handleVehicleChange('channel', e.target.value)}>
-                                        {(masterData['Sync Channels'] || []).map(m => (
-                                            <option key={m.id} value={m.name}>{m.name}</option>
-                                        ))}
-                                        {!masterData['Sync Channels']?.length && <option value="Human Capital Operation">Human Capital Operation</option>}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Dept / Cabang <Required/></label>
-                                    <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.cabang || ''} onChange={(e) => handleVehicleChange('cabang', e.target.value)}>
-                                        {(masterData['Sync Branchs'] || []).map(m => (
-                                            <option key={m.id} value={m.name}>{m.name}</option>
-                                        ))}
-                                        {!masterData['Sync Branchs']?.length && <option value="Pusat">Pusat</option>}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Pengguna <Required/></label>
-                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.pengguna || ''} onChange={(e) => handleVehicleChange('pengguna', e.target.value)} />
-                                </div>
-                            </div>
-                        </div>
-                         {/* Lampiran */}
-                         <div className="mt-4">
-                            <SectionHeader title={t.attachments} />
-                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                                {[
-                                    'Tampak Depan',
-                                    'Tampak Belakang',
-                                    'Tampak Kiri',
-                                    'Tampak Kanan',
-                                    'Foto STNK',
-                                    'Foto KIR'
-                                ].map((label, idx) => (
-                                   <label key={idx} className={`relative group flex flex-col items-center justify-center aspect-square bg-white border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all ${isViewMode ? 'cursor-default opacity-75' : 'cursor-pointer'}`}>
-                                        <input type="file" className="hidden" disabled={isViewMode} />
-                                        <div className="p-2 rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors mb-2">
-                                            <ImageIcon size={18} className="text-gray-500" />
-                                        </div>
-                                        <span className="text-[10px] font-medium text-gray-600 text-center px-1 leading-tight">{label}</span>
-                                        
-                                        {!isViewMode && (
-                                            <div className="absolute top-2 right-2 bg-black text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
-                                                <Plus size={10} />
-                                            </div>
-                                        )}
-                                   </label>
-                                ))}
-                            </div>
-                        </div>
-
                     </div>
-
-                    {/* Column 2: Surat, Pembelian, Asuransi */}
                     <div className="space-y-6">
-                         {/* Surat */}
-                        <div>
+                         <div>
                              <SectionHeader title={t.documents} />
                              <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">No. BPKB <Required/></label>
-                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noBpkb || ''} onChange={(e) => handleVehicleChange('noBpkb', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Keterangan BPKB</label>
-                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.keteranganBpkb || ''} onChange={(e) => handleVehicleChange('keteranganBpkb', e.target.value)} />
-                                </div>
-                             </div>
-                             <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Masa Berlaku 1 Thn <Required/></label>
-                                    <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.masaBerlaku1 || ''} onChange={(e) => handleVehicleChange('masaBerlaku1', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Masa Berlaku 5 Thn <Required/></label>
-                                    <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.masaBerlaku5 || ''} onChange={(e) => handleVehicleChange('masaBerlaku5', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Masa Berlaku KIR</label>
-                                    <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.masaBerlakuKir || ''} onChange={(e) => handleVehicleChange('masaBerlakuKir', e.target.value)} />
-                                </div>
+                                <div><label className="block text-xs font-medium text-gray-600 mb-1">No. BPKB *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.noBpkb} onChange={(e) => handleVehicleChange('noBpkb', e.target.value)} /></div>
+                                <div><label className="block text-xs font-medium text-gray-600 mb-1">Masa Berlaku STNK</label><input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.masaBerlaku1} onChange={(e) => handleVehicleChange('masaBerlaku1', e.target.value)} /></div>
                              </div>
                         </div>
-
-                        {/* Pembelian */}
                         <div>
                              <SectionHeader title={t.purchase} />
                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Tgl Beli <Required/></label>
-                                    <input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.tglBeli || ''} onChange={(e) => handleVehicleChange('tglBeli', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Harga Beli <Required/></label>
-                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.hargaBeli || ''} onChange={(e) => handleVehicleChange('hargaBeli', e.target.value)} />
-                                </div>
-                             </div>
-                        </div>
-
-                         {/* Asuransi */}
-                        <div>
-                             <SectionHeader title={t.insurance} />
-                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">No Polis</label>
-                                    <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.noPolisAsuransi || ''} onChange={(e) => handleVehicleChange('noPolisAsuransi', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Jangka Pertanggungan</label>
-                                    <input type="text" placeholder="dd/mm/yyyy" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" disabled={isViewMode} value={vehicleForm.jangkaPertanggungan || ''} onChange={(e) => handleVehicleChange('jangkaPertanggungan', e.target.value)} />
-                                </div>
+                                <div><label className="block text-xs font-medium text-gray-600 mb-1">Tgl Beli *</label><input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.tglBeli} onChange={(e) => handleVehicleChange('tglBeli', e.target.value)} /></div>
+                                <div><label className="block text-xs font-medium text-gray-600 mb-1">Harga Beli *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={vehicleForm.hargaBeli} onChange={(e) => handleVehicleChange('hargaBeli', e.target.value)} /></div>
                              </div>
                         </div>
                     </div>
                 </div>
             </div>
-          ) : isMutation ? (
-              /* --- MUTATION FORM (Updated with Dynamic Masters) --- */
-               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title={t.createRequest} />
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Mutasi <Required/></label>
-                             {/* Dynamic Master: Tipe Mutasi */}
-                            <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={mutationForm.tipeMutasi} onChange={(e) => handleMutationChange('tipeMutasi', e.target.value)} disabled={isViewMode}>
-                                {(masterData['Tipe Mutasi'] || []).map(m => (
-                                    <option key={m.id} value={m.name}>{m.name}</option>
-                                ))}
-                                {!masterData['Tipe Mutasi']?.length && <option value="Kirim">Kirim</option>}
-                            </select>
-                        </div>
-                        {/* ... Locations ... */}
-                         <div className="flex flex-col md:flex-row gap-6">
-                            <div className="flex-1">
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Channel Tujuan <Required/></label>
-                                 {/* Dynamic Master: Sync Channels */}
-                                <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={mutationForm.channelTujuan} onChange={(e) => handleMutationChange('channelTujuan', e.target.value)} disabled={isViewMode}>
-                                    <option value="">Pilih Channel Tujuan</option>
-                                    {(masterData['Sync Channels'] || []).map(m => (
-                                        <option key={m.id} value={m.name}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                         {/* ... Asset and Reason ... */}
-                    </div>
-               </div>
-          ) : isSales ? (
-               /* --- SALES FORM --- */
+          ) : isService ? (
+            /* --- SERVICE FORM --- */
+            <div className="space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <SectionHeader title={t.createRequest} />
-                    {/* ... Sales Fields ... */}
-                    <div className="space-y-6">
-                         <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Aset <Required/></label>
-                            <div className="flex gap-2">
-                                <select className="flex-1 bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-black disabled:bg-gray-100" value={salesForm.asetId || ''} onChange={(e) => handleSalesChange('asetId', e.target.value)} disabled={isViewMode}>
-                                    <option value="">(Pilih Kendaraan)</option>
-                                    {vehicleList.map(v => ( <option key={v.id} value={v.id}>{v.nama} - {v.noPolisi}</option> ))}
-                                </select>
-                                <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded border border-gray-300 text-sm hover:bg-gray-200 transition-colors" disabled={isViewMode}>Detil</button>
-                            </div>
+                    <SectionHeader title={t.detailInfo} icon={<List size={18} />} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                             <label className="block text-xs font-medium text-gray-600 mb-1">Aset / Kendaraan *</label>
+                             <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.aset || ''} onChange={(e) => handleServiceChange('aset', e.target.value)}>
+                                <option value="">(Pilih Kendaraan)</option>
+                                {vehicleList.map(v => ( <option key={v.id} value={v.id}>{v.noPolisi} - {v.nama}</option> ))}
+                             </select>
                         </div>
-                         {/* ... Target Selesai, Alasan, Catatan ... */}
+                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Odometer (KM) *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.kmKendaraan} onChange={(e) => handleServiceChange('kmKendaraan', e.target.value)} /></div>
+                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Target Selesai *</label><input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.targetSelesai} onChange={(e) => handleServiceChange('targetSelesai', e.target.value)} /></div>
+                        <div className="md:col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Keluhan / Masalah *</label><textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" rows={3} value={serviceForm.masalah} onChange={(e) => handleServiceChange('masalah', e.target.value)} /></div>
                     </div>
-                     {/* ... Offers Table ... */}
-                     <div className="mt-8">
-                        <SectionHeader title={t.offers} />
-                         {/* ... Offers ... */}
-                         <div className="w-full bg-[#0088CC] text-white p-1 flex items-center justify-center cursor-pointer hover:bg-[#0077b3] transition-colors" onClick={!isViewMode ? addOfferRow : undefined}>
-                            <Plus size={16} />
-                         </div>
-                     </div>
                 </div>
+            </div>
+          ) : isMasterVendor ? (
+             /* --- MASTER VENDOR FORM --- */
+             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label className="block text-xs font-medium text-gray-600 mb-1">Nama Vendor *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={masterVendorForm.nama} onChange={(e) => handleMasterVendorChange('nama', e.target.value)} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 mb-1">PIC *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={masterVendorForm.pic} onChange={(e) => handleMasterVendorChange('pic', e.target.value)} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 mb-1">No Telp *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={masterVendorForm.noTelp} onChange={(e) => handleMasterVendorChange('noTelp', e.target.value)} /></div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Vendor *</label>
+                        <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={masterVendorForm.tipe} onChange={(e) => handleMasterVendorChange('tipe', e.target.value)}>
+                            <option value="Vendor Servis">Vendor Servis</option>
+                            <option value="Vendor Mutasi">Vendor Mutasi</option>
+                        </select>
+                    </div>
+                </div>
+             </div>
+          ) : isMaster ? (
+              /* --- MASTER GENERIC FORM --- */
+              <div className="space-y-4">
+                  <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
+                      <input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={masterForm.name} onChange={(e) => handleMasterChange(e.target.value)} />
+                  </div>
+              </div>
           ) : (
-            // Default Asset Form (Placeholder)
-             <div className="p-4 text-center text-gray-500">Form Placeholder for {moduleName}</div>
+            <div className="p-4 text-center text-gray-500">
+                Form for {moduleName} is under construction.
+            </div>
           )}
         </div>
 
         {/* Modal Footer */}
         {mode !== 'view' && (
             <div className="px-8 py-4 bg-white border-t border-gray-200 flex justify-end gap-3">
-            <button 
-                onClick={onClose}
-                className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={onClose} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                 {t.draft}
             </button>
-            <button 
-                onClick={handleSave}
-                className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors shadow-sm ${isMasterVendor ? 'bg-orange-500 hover:bg-orange-600' : 'bg-black hover:bg-gray-800'}`}
-            >
-                {isMasterVendor ? t.submit : t.save}
+            <button onClick={handleSave} className="px-6 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 shadow-sm">
+                {t.save}
             </button>
             </div>
         )}

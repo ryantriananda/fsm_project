@@ -29,8 +29,9 @@ interface Props {
 }
 
 interface MenuItem {
-    label: string;
-    key?: string; // Add a key for translation lookup
+    label?: string;
+    key: string; // Add a key for translation lookup
+    originalLabel?: string; // Force specific ID for logic
     icon: React.ReactNode;
     subItems?: MenuItem[];
 }
@@ -45,8 +46,8 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
   };
 
   // Define menu structure using keys for translation
-  const menuStructure = [
-    { key: 'dashboard', icon: <LayoutDashboard size={20} /> },
+  const menuStructure: MenuItem[] = [
+    { key: 'dashboard', icon: <LayoutDashboard size={20} />, originalLabel: 'ATK' }, // Defaulting dashboard to ATK for now based on App logic, or separate Dashboard
     { 
         key: 'vehicle', 
         icon: <Car size={20} />,
@@ -58,12 +59,12 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
             { key: 'sales', icon: <DollarSign size={18} />, originalLabel: 'Penjualan' },
         ]
     },
-    { key: 'atk', icon: <PenTool size={20} /> },
-    { key: 'ark', icon: <ShoppingCart size={20} /> },
-    { key: 'contract', icon: <FileText size={20} /> },
-    { key: 'timesheet', icon: <Clock size={20} /> },
-    { key: 'vendor', icon: <Users size={20} /> },
-    { key: 'creditCard', icon: <CreditCard size={20} /> },
+    { key: 'atk', icon: <PenTool size={20} />, originalLabel: 'ATK' },
+    { key: 'ark', icon: <ShoppingCart size={20} />, originalLabel: 'ARK' },
+    { key: 'contract', icon: <FileText size={20} />, originalLabel: 'Contract' },
+    { key: 'timesheet', icon: <Clock size={20} />, originalLabel: 'Timesheet' },
+    { key: 'vendor', icon: <Users size={20} />, originalLabel: 'Vendor' },
+    { key: 'creditCard', icon: <CreditCard size={20} />, originalLabel: 'Credit Card' },
     { 
       key: 'masterData', 
       icon: <Home size={20} />,
@@ -80,8 +81,8 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
         { key: 'masterVendor', icon: <Users size={18} />, originalLabel: 'Master Vendor' },
       ]
     },
-    { key: 'logBook', icon: <BookOpen size={20} /> },
-    { key: 'projectMgmt', icon: <BarChart size={20} /> },
+    { key: 'logBook', icon: <BookOpen size={20} />, originalLabel: 'Log Book' },
+    { key: 'projectMgmt', icon: <BarChart size={20} />, originalLabel: 'Project Mgmt' },
   ];
 
   return (
@@ -112,15 +113,11 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
         {menuStructure.map((item, index) => {
           const label = t[item.key] || item.key;
           const hasSub = item.subItems && item.subItems.length > 0;
-          const isExpanded = expandedMenus.includes(label) || expandedMenus.includes(item.key); // Check both for persistence
+          const isExpanded = expandedMenus.includes(label) || expandedMenus.includes(item.key); 
           
-          // Check if parent is active (exact match on label or activeItem matches one of its children's original labels)
-          // Note: navigation logic relies on original labels mostly in App.tsx, we display translated.
-          // To keep it simple, we check against the translated label or the key if needed.
-          // However, App.tsx state likely holds the 'Original' string (e.g., 'Daftar Aset').
-          // We need to match activeItem (which is likely the ID string) to the ID string here.
-          
-          const isParentActive = activeItem === item.key || activeItem === label;
+          // Determine if active. For parent with sub, we check if children match. For single, check ID.
+          const navTarget = item.originalLabel || label;
+          const isParentActive = activeItem === navTarget || activeItem === item.key;
 
           if (hasSub) {
               return (
@@ -140,14 +137,14 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
                           <div className="space-y-1">
                               {item.subItems!.map((sub, subIndex) => {
                                   const subLabel = t[sub.key] || sub.key;
-                                  // Navigate using the Original Label (ID) because App.tsx logic switches on those strings
-                                  const navTarget = sub.originalLabel || subLabel; 
-                                  const isSubActive = activeItem === navTarget;
+                                  // Navigate using the Original Label (ID)
+                                  const subNavTarget = sub.originalLabel || subLabel; 
+                                  const isSubActive = activeItem === subNavTarget;
                                   
                                   return (
                                     <button
                                         key={subIndex}
-                                        onClick={() => onNavigate(navTarget)}
+                                        onClick={() => onNavigate(subNavTarget)}
                                         className={`w-full flex items-center gap-4 pl-12 pr-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200
                                             ${isSubActive
                                             ? 'bg-[#1a1a1a] text-white border-l-4 border-white' 
@@ -167,7 +164,7 @@ export const Sidebar: React.FC<Props> = ({ activeItem, onNavigate, t }) => {
           return (
             <button
               key={index}
-              onClick={() => onNavigate(t[item.key] || item.key)} // Fallback for simple items
+              onClick={() => onNavigate(navTarget)} 
               className={`w-full flex items-center gap-4 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200
                 ${isParentActive
                   ? 'bg-[#1a1a1a] text-white border-l-4 border-white' 
