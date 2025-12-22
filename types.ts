@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface Employee {
@@ -187,6 +188,14 @@ export interface VehicleRecord {
   jangkaPertanggungan?: string;
 }
 
+export interface ServiceHistory {
+  id: number;
+  date: string;
+  user: string;
+  action: string;
+  notes?: string;
+}
+
 export interface ServiceRecord {
   id: string; // e.g. "S2024060003"
   noPolisi: string;
@@ -209,6 +218,9 @@ export interface ServiceRecord {
   jenisPembayaran?: string;
   namaBank?: string;
   nomorRekening?: string;
+
+  // History
+  history?: ServiceHistory[];
 }
 
 export interface TaxKirRecord {

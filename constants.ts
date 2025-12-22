@@ -1,7 +1,7 @@
+
 import { AssetRecord, MasterItem, ContractRecord, TimesheetRecord, VendorRecord, VehicleRecord, ServiceRecord, TaxKirRecord, MutationRecord, SalesRecord, MasterVendorRecord } from './types';
 
 export const MOCK_DATA: AssetRecord[] = [
-  // ... (Asset Records remain same)
   {
     id: 1,
     employee: {
@@ -19,11 +19,9 @@ export const MOCK_DATA: AssetRecord[] = [
     itemCode: 'TP-HP0048',
     status: 'Approved'
   },
-  // ... (Other asset records)
 ];
 
 export const MOCK_MASTER_DATA: MasterItem[] = [
-    // ... (Master data)
     {
     id: 1,
     category: 'Tinta Printer',
@@ -37,7 +35,6 @@ export const MOCK_MASTER_DATA: MasterItem[] = [
 ];
 
 export const MOCK_ARK_DATA: AssetRecord[] = [
-    // ... (ARK Data)
     {
       id: 1,
       employee: {
@@ -58,7 +55,6 @@ export const MOCK_ARK_DATA: AssetRecord[] = [
 ];
 
 export const MOCK_MASTER_ARK_DATA: MasterItem[] = [
-    // ...
     {
       id: 1,
       category: 'Tissue',
@@ -125,34 +121,6 @@ export const MOCK_CONTRACT_DATA: ContractRecord[] = [
             pnlSummary: 'ROI 12%',
             photos: ['https://picsum.photos/id/10/200/150']
         },
-        {
-            id: 'opt2',
-            type: 'Option',
-            name: 'Gudang Margomulyo',
-            address: 'Jl. Margomulyo Indah A-5',
-            rentalPrice: 'Rp 300jt/thn',
-            buildingSize: '800m2',
-            landSize: '1000m2',
-            mapUrl: 'https://maps.google.com',
-            pros: 'Murah, sangat luas',
-            cons: 'Jauh dari pusat kota, akses macet',
-            pnlSummary: 'ROI 18%',
-            photos: ['https://picsum.photos/id/20/200/150']
-        },
-        {
-            id: 'opt3',
-            type: 'Option',
-            name: 'Ruko HR Muhammad',
-            address: 'Jl. HR Muhammad No. 102',
-            rentalPrice: 'Rp 750jt/thn',
-            buildingSize: '450m2',
-            landSize: '450m2',
-            mapUrl: 'https://maps.google.com',
-            pros: 'Area elite, branding bagus',
-            cons: 'Sangat mahal, ukuran kecil',
-            pnlSummary: 'ROI 10%',
-            photos: ['https://picsum.photos/id/30/200/150']
-        }
     ],
     documents: {
         imb: true,
@@ -185,7 +153,6 @@ export const MOCK_CONTRACT_DATA: ContractRecord[] = [
 ];
 
 export const MOCK_TIMESHEET_DATA: TimesheetRecord[] = [
-    // ... (Keep existing)
     {
         id: 1,
         employee: {
@@ -214,7 +181,6 @@ export const MOCK_VENDOR_DATA: VendorRecord[] = [
 ];
 
 export const MOCK_MASTER_VENDOR_DATA: MasterVendorRecord[] = [
-    // ... (Keep existing)
     {
         id: 1,
         nama: 'PT. Mitra Ananta Megah',
@@ -228,7 +194,6 @@ export const MOCK_MASTER_VENDOR_DATA: MasterVendorRecord[] = [
 ];
 
 export const MOCK_VEHICLE_DATA: VehicleRecord[] = [
-    // ... (Keep existing)
     {
         id: 1,
         noRegistrasi: '301-00208',
@@ -241,7 +206,6 @@ export const MOCK_VEHICLE_DATA: VehicleRecord[] = [
 ];
 
 export const MOCK_SERVICE_DATA: ServiceRecord[] = [
-    // ... (Keep existing)
     {
         id: 'S2024060003',
         noPolisi: 'B 9433 CCA',
@@ -249,14 +213,17 @@ export const MOCK_SERVICE_DATA: ServiceRecord[] = [
         channel: 'Warehouse & Distribution',
         cabang: 'Pusat',
         status: 'Draf',
-        statusApproval: '-'
+        statusApproval: '-',
+        history: [
+            { id: 1, date: '28 Jun 2024 17:24', user: 'Muhammad Resa', action: 'Create Request', notes: 'Servis rutin berkala 10.000 KM' },
+            { id: 2, date: '28 Jun 2024 17:30', user: 'System', action: 'Status Update', notes: 'Changed status to Draf' }
+        ]
     }
 ];
 
 export const MOCK_TAX_KIR_DATA: TaxKirRecord[] = [];
 
 export const MOCK_MUTATION_DATA: MutationRecord[] = [
-    // ... (Keep existing)
     {
         id: 'M2023090001',
         noPolisi: 'BE 9353 YD',
@@ -271,7 +238,6 @@ export const MOCK_MUTATION_DATA: MutationRecord[] = [
 ];
 
 export const MOCK_SALES_DATA: SalesRecord[] = [
-  // ... (Keep existing)
   {
     id: 'J2023090001',
     noPolisi: 'B 9433 CCA',

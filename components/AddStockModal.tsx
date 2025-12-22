@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Image as ImageIcon, List, DollarSign, Wrench, Upload, ShieldCheck, Home, FileText, CheckCircle, Clock, MapPin, BarChart2 } from 'lucide-react';
+import { X, Plus, Trash2, Image as ImageIcon, List, DollarSign, Wrench, Upload, ShieldCheck, Home, FileText, CheckCircle, Clock, MapPin, BarChart2, History } from 'lucide-react';
 import { VehicleRecord, ServiceRecord, MutationRecord, SalesRecord, SalesOffer, ContractRecord, GeneralMasterItem, MasterVendorRecord, BuildingComparisonItem } from '../types';
 
 interface Props {
@@ -540,16 +540,49 @@ export const AddStockModal: React.FC<Props> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
                              <label className="block text-xs font-medium text-gray-600 mb-1">Aset / Kendaraan *</label>
-                             <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.aset || ''} onChange={(e) => handleServiceChange('aset', e.target.value)}>
+                             <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.aset || ''} onChange={(e) => handleServiceChange('aset', e.target.value)} disabled={isViewMode}>
                                 <option value="">(Pilih Kendaraan)</option>
                                 {vehicleList.map(v => ( <option key={v.id} value={v.id}>{v.noPolisi} - {v.nama}</option> ))}
                              </select>
                         </div>
-                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Odometer (KM) *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.kmKendaraan} onChange={(e) => handleServiceChange('kmKendaraan', e.target.value)} /></div>
-                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Target Selesai *</label><input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.targetSelesai} onChange={(e) => handleServiceChange('targetSelesai', e.target.value)} /></div>
-                        <div className="md:col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Keluhan / Masalah *</label><textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" rows={3} value={serviceForm.masalah} onChange={(e) => handleServiceChange('masalah', e.target.value)} /></div>
+                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Odometer (KM) *</label><input type="text" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.kmKendaraan} onChange={(e) => handleServiceChange('kmKendaraan', e.target.value)} disabled={isViewMode} /></div>
+                        <div><label className="block text-xs font-medium text-gray-600 mb-1">Target Selesai *</label><input type="date" className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" value={serviceForm.targetSelesai} onChange={(e) => handleServiceChange('targetSelesai', e.target.value)} disabled={isViewMode} /></div>
+                        <div className="md:col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Keluhan / Masalah *</label><textarea className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm" rows={3} value={serviceForm.masalah} onChange={(e) => handleServiceChange('masalah', e.target.value)} disabled={isViewMode} /></div>
                     </div>
                 </div>
+
+                {/* Log History Detail */}
+                {(isViewMode || mode === 'edit') && serviceForm.history && serviceForm.history.length > 0 && (
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <SectionHeader title={t.logHistory} icon={<History size={18} />} />
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-200 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        <th className="p-3 w-40">{t.date}</th>
+                                        <th className="p-3 w-48">{t.user}</th>
+                                        <th className="p-3 w-40">{t.action}</th>
+                                        <th className="p-3">{t.notes}</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 text-xs">
+                                    {serviceForm.history.map((log) => (
+                                        <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="p-3 text-gray-500 font-mono">{log.date}</td>
+                                            <td className="p-3 text-gray-900 font-medium">{log.user}</td>
+                                            <td className="p-3">
+                                                <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold uppercase text-[9px]">
+                                                    {log.action}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-gray-600 italic">{log.notes || '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
           ) : isMasterVendor ? (
              /* --- MASTER VENDOR FORM --- */

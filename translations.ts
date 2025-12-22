@@ -72,6 +72,11 @@ export const TRANSLATIONS = {
     attachments: 'Lampiran',
     users: 'Pengguna',
     offers: 'Penawaran',
+    logHistory: 'Log Riwayat',
+    action: 'Aksi',
+    user: 'Pengguna',
+    date: 'Tanggal',
+    notes: 'Catatan',
     // New Service Fields
     odometer: 'KM Kendaraan (Odo)',
     targetDate: 'Target Selesai',
@@ -171,6 +176,11 @@ export const TRANSLATIONS = {
     attachments: 'Attachments',
     users: 'Users',
     offers: 'Offers',
+    logHistory: 'Log History',
+    action: 'Action',
+    user: 'User',
+    date: 'Date',
+    notes: 'Notes',
     // New Service Fields
     odometer: 'Odometer (KM)',
     targetDate: 'Target Completion',

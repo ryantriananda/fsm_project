@@ -78,7 +78,7 @@ const App: React.FC = () => {
   const handleModuleNavigate = (module: string) => {
     setActiveModule(module);
     if (module === 'Contract') {
-        setActiveTab('Own');
+        setActiveTab(t.own);
     } else if (module === 'Timesheet') {
         setActiveTab('Active');
     } else if (module === 'Vendor') {
@@ -369,7 +369,18 @@ const App: React.FC = () => {
         if (activeTab === 'Master') return <MasterAtkTable data={MOCK_MASTER_ARK_DATA} />;
         return <AssetTable data={MOCK_ARK_DATA} />;
     }
-    if (activeModule === 'Contract') return <ContractTable data={contractData} onEdit={handleEditContract} onView={handleViewContract} />;
+    if (activeModule === 'Contract') {
+        const isRent = activeTab === t.rent;
+        const isOwn = activeTab === t.own;
+        
+        const filtered = contractData.filter(c => {
+             if (isRent) return c.ownership === 'Rent';
+             if (isOwn) return c.ownership === 'Own';
+             return true;
+        });
+        
+        return <ContractTable data={filtered} onEdit={handleEditContract} onView={handleViewContract} />;
+    }
     if (activeModule === 'Timesheet') return <TimesheetTable data={MOCK_TIMESHEET_DATA} />;
     if (activeModule === 'Vendor') return <VendorTable data={MOCK_VENDOR_DATA} />;
     

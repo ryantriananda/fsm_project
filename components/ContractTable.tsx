@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ContractRecord } from '../types';
 import { ChevronsUpDown, Eye, FolderX, Pencil, Building2 } from 'lucide-react';
@@ -59,7 +60,11 @@ export const ContractTable: React.FC<Props> = ({ data, onEdit, onView }) => {
           <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
             {data.length > 0 ? (
                 data.map((item) => (
-                    <tr key={item.id} className="bg-white hover:bg-gray-50 transition-colors cursor-pointer group">
+                    <tr 
+                        key={item.id} 
+                        className="bg-white hover:bg-gray-50 transition-colors cursor-pointer group"
+                        onClick={() => onView?.(item)}
+                    >
                         <td className="p-4">
                              <div className="flex items-start gap-3">
                                 <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
